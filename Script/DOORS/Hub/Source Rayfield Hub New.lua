@@ -37,7 +37,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Spawner Custom Entities", rbxassetid://12932323187) -- Title, Image
+local Tab = Window:CreateTab("Spawner Custom Entities", 12932323187) -- Title, Image
 
 local Section = Tab:CreateSection("Spawner")
 
@@ -246,7 +246,7 @@ local Button = Tab:CreateButton({
    end,
 })
 
-local Tab = Window:CreateTab("Entities", rbxassetid://10890175548) -- Title, Image
+local Tab = Window:CreateTab("Entities", 4483362458) -- Title, Image
 
 local Section = Tab:CreateSection("Entities")
 
@@ -390,7 +390,7 @@ entity:Run()
    end,
 })
 
-local Tab = Window:CreateTab("Crucifix (patched)", rbxassetid://12434169015) -- Title, Image
+local Tab = Window:CreateTab("Crucifix (patched)", 4483362458) -- Title, Image
 
 local Section = Tab:CreateSection("Crucifix")
 
