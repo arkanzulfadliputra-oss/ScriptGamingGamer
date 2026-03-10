@@ -1,0 +1,15 @@
+if game.PlaceId == 6839171747 then   
+     game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Loading",
+        Text = "Script Loading",
+        Duration = 5
+    })
+    
+    loadstring(game:HttpGet("https://pastebin.com/raw/RDnJh2XE"))()
+else
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "What are you doing?",
+        Text = "You're Playing the Wrong Game",
+        Duration = 5
+    })
+end
