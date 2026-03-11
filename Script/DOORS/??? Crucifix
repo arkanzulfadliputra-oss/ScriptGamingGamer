@@ -1,0 +1,2 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
+LoadCustomInstance("rbxassetid://12069466123").Parent = game:GetService("Players").LocalPlayer.Backpack
