@@ -1,0 +1,57 @@
+local tool = LoadCustomInstance("rbxassetid://12338008713")
+tool.Parent = game:GetService("Players").LocalPlayer.Backpack
+
+local anim = Instance.new("Animation")
+anim.Name = "CrucifixAnim"
+anim.AnimationId = "rbxassetid://97939285526557"
+anim.Parent = tool
+
+local track = nil
+local isPlaying = false
+
+tool.Equipped:Connect(function()
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    
+    if not track then
+        track = animator:LoadAnimation(anim)
+    end
+    
+    if not isPlaying then
+        isPlaying = true
+        track:Play()
+    end
+end)
+
+tool.Unequipped:Connect(function()
+    if isPlaying and track then
+        isPlaying = false
+        track:Stop()
+    end
+end)
+
+track.Stopped:Connect(function()
+    if isPlaying then
+        track:Play()
+    end
+end)
+
+local canClick = true
+
+tool.Activated:Connect(function()
+    if not canClick then return end
+    
+    canClick = false
+    
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://136836151370178"
+    sound.Volume = 1
+    sound.Parent = tool
+    sound:Play()
+    
+    game:GetService("Debris"):AddItem(sound, sound.TimeLength or 5)
+    task.wait(1)
+    canClick = true
+end)
