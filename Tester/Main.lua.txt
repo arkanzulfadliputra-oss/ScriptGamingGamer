@@ -256,7 +256,7 @@ SectionRight:NewButton({
 })
 
 local FETab = Windows:NewTab({
-	Title = "FE",
+	Title = "FE(It is recommended to play on players who do not use Morph SCP 096)",
 	Description = "FE",
 	Icon = "rbxassetid://0"
 })
@@ -311,9 +311,6 @@ FeSectionLeft:NewButton({
 		humanoid.WalkSpeed = 30
 		humanoid.JumpPower = 70
 		humanoid.AutoRotate = true
-		humanoid.MaxHealth = 9e9
-		humanoid.Health = 9e9
-		humanoid.BreakJointsOnDeath = false
 
 		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then
