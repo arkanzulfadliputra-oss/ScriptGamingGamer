@@ -261,7 +261,7 @@ local FETab = Windows:NewTab({
 	Icon = "rbxassetid://0"
 })
 
-local FeSectionLeft = FeTab:NewSection({
+local FeSectionLeft = FETab:NewSection({
 	Title = "FE",
 	Icon = "rbxassetid://0",
 	Position = "Left"
