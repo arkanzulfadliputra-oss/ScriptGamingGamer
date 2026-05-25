@@ -1,0 +1,1215 @@
+local NothingLibrary = loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/3345-c-a-t-s-u-s/NOTHING/main/source.lua'))();
+local Notification = NothingLibrary.Notification();
+
+local Windows = NothingLibrary.new({
+	Title = "Script Gaming | SCP GAMES",
+	Description = "This is Made Using Nothing lib",
+	Keybind = Enum.KeyCode.LeftControl,
+	Logo = '12342570995'
+})
+
+local PlayerTab = Windows:NewTab({
+	Title = "Player",
+	Description = "Player",
+	Icon = "rbxassetid://7992557358"
+})
+
+local SectionLeft = PlayerTab:NewSection({
+	Title = "Player",
+	Icon = "rbxassetid://7992557358",
+	Position = "Left"
+})
+
+local SectionRight = PlayerTab:NewSection({
+	Title = "Sound",
+	Icon = "rbxassetid://6994764651",
+	Position = "Right"
+})
+
+local Plr = game.Players.LocalPlayer
+local TargetSpeed = 16
+
+task.spawn(function()
+	while true do
+		task.wait(0.03)
+		local char = Plr.Character
+		if char and char:FindFirstChild("Humanoid") then
+			local hum = char.Humanoid
+			if hum.WalkSpeed ~= TargetSpeed then
+				hum.WalkSpeed = TargetSpeed
+			end
+		end
+	end
+end)
+
+SectionLeft:NewSlider({
+	Title = "WalkSpeed",
+	Min = 16,
+	Max = 350,
+	Default = 16,
+	Callback = function(Value)
+		TargetSpeed = Value
+		local char = Plr.Character
+		if char and char:FindFirstChild("Humanoid") then
+			char.Humanoid.WalkSpeed = Value
+		end
+	end,
+})
+
+local NoclipActive = false
+local NoclipConnection = nil
+
+SectionLeft:NewToggle({
+	Title = "Noclip",
+	Default = false,
+	Callback = function(state)
+		NoclipActive = state
+		if state then
+			if NoclipConnection then
+				NoclipConnection:Disconnect()
+			end
+			NoclipConnection = game:GetService("RunService").RenderStepped:Connect(function()
+				local char = game.Players.LocalPlayer.Character
+				if char then
+					for _, part in ipairs(char:GetDescendants()) do
+						if part:IsA("BasePart") then
+							part.CanCollide = false
+						end
+					end
+				end
+			end)
+		else
+			if NoclipConnection then
+				NoclipConnection:Disconnect()
+				NoclipConnection = nil
+			end
+			local char = game.Players.LocalPlayer.Character
+			if char then
+				for _, part in ipairs(char:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = true
+					end
+				end
+			end
+		end
+	end,
+})
+
+local RunService = game:GetService("RunService")
+local Camera = game.Workspace.CurrentCamera
+local TargetFOV = Camera.FieldOfView
+local FOVConnection = nil
+
+FOVConnection = RunService.RenderStepped:Connect(function()
+	if Camera.FieldOfView ~= TargetFOV then
+		Camera.FieldOfView = TargetFOV
+	end
+end)
+
+SectionLeft:NewSlider({
+	Title = "FIELD OF VIEW",
+	Min = 1,
+	Max = 120,
+	Default = Camera.FieldOfView,
+	Callback = function(Value)
+		TargetFOV = Value
+		Camera.FieldOfView = Value
+	end,
+})
+
+local SpinActive = false
+local SpinSpeed = 1
+local SpinConnection = nil
+
+SectionLeft:NewSlider({
+	Title = "Spin Speed",
+	Min = 0.5,
+	Max = 10,
+	Default = 1,
+	Precision = 1,
+	Callback = function(Value)
+		SpinSpeed = Value
+	end,
+})
+
+SectionLeft:NewToggle({
+	Title = "Spin",
+	Default = false,
+	Callback = function(state)
+		SpinActive = state
+		if state then
+			if SpinConnection then
+				SpinConnection:Disconnect()
+			end
+			SpinConnection = RunService.RenderStepped:Connect(function()
+				local char = Plr.Character
+				if char and char:FindFirstChild("HumanoidRootPart") then
+					local root = char.HumanoidRootPart
+					root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(SpinSpeed * 10), 0)
+				end
+			end)
+		else
+			if SpinConnection then
+				SpinConnection:Disconnect()
+				SpinConnection = nil
+			end
+		end
+	end,
+})
+
+local SoundPlayer = nil
+
+local function PlayLoopSound(SoundId)
+	if SoundPlayer and SoundPlayer.Parent then
+		SoundPlayer:Stop()
+		SoundPlayer:Destroy()
+	end
+	local Player = game.Players.LocalPlayer
+	local Character = Player.Character
+	local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+	if HumanoidRootPart then
+		SoundPlayer = Instance.new("Sound")
+		SoundPlayer.SoundId = SoundId
+		SoundPlayer.Volume = 3
+		SoundPlayer.Looped = true
+		SoundPlayer.Parent = HumanoidRootPart
+		SoundPlayer:Play()
+	end
+end
+
+local function PlayOnceSound(SoundId)
+	if SoundPlayer and SoundPlayer.Parent then
+		SoundPlayer:Stop()
+		SoundPlayer:Destroy()
+	end
+	local Player = game.Players.LocalPlayer
+	local Character = Player.Character
+	local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+	if HumanoidRootPart then
+		SoundPlayer = Instance.new("Sound")
+		SoundPlayer.SoundId = SoundId
+		SoundPlayer.Volume = 3
+		SoundPlayer.Looped = false
+		SoundPlayer.Parent = HumanoidRootPart
+		SoundPlayer:Play()
+	end
+end
+
+SectionRight:NewButton({
+	Title = "Stop Sound",
+	Callback = function()
+		if SoundPlayer and SoundPlayer.Parent then
+			SoundPlayer:Stop()
+			SoundPlayer:Destroy()
+			SoundPlayer = nil
+		end
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "SL 096 RAGE LOOP (Looped)",
+	Callback = function()
+		PlayLoopSound("rbxassetid://15283443061")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "096 RAGE LOOP (Looped)",
+	Callback = function()
+		PlayLoopSound("rbxassetid://15283441112")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "096 Crying (Looped)",
+	Callback = function()
+		PlayLoopSound("rbxassetid://9161589557")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "SL 096 PLAYER DIED",
+	Callback = function()
+		PlayOnceSound("rbxassetid://15283442515")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "SL 096 PANIC",
+	Callback = function()
+		PlayOnceSound("rbxassetid://15283443716")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "096 PANIC",
+	Callback = function()
+		PlayOnceSound("rbxassetid://15283462663")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "096 Player Died",
+	Callback = function()
+		PlayOnceSound("rbxassetid://17878427121")
+	end,
+})
+
+SectionRight:NewButton({
+	Title = "SL 096 PANIC",
+	Callback = function()
+		PlayOnceSound("rbxassetid://15283443716")
+	end,
+})
+
+local FETab = Windows:NewTab({
+	Title = "FE",
+	Description = "FE",
+	Icon = "rbxassetid://0"
+})
+
+local FeSectionLeft = EspTab:NewSection({
+	Title = "FE",
+	Icon = "rbxassetid://0",
+	Position = "Left"
+})
+
+FeSectionLeft:NewButton({
+	Title = "FE SCP 096SL(Edit In Slider Walkspeed)",
+	Callback = function()
+		local Players = game:GetService("Players")
+		local Player = Players.LocalPlayer
+		local RunService = game:GetService("RunService")
+
+		local oldChar = Player.Character or Player.CharacterAdded:Wait()
+		local oldHRP = oldChar:WaitForChild("HumanoidRootPart")
+
+		local model = workspace:FindFirstChild("SCP 096SL")
+		if not model then return end
+
+		local inner = model:FindFirstChild("SCP 096SL")
+		if not inner then return end
+
+		if oldChar then
+			oldChar:Destroy()
+		end
+
+		local char = inner:Clone()
+		char.Name = Player.Name
+		char.Parent = workspace
+
+		for _, v in pairs(char:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.Anchored = false
+				v.CanCollide = true
+				v.Massless = false
+				if v.Name == "HumanoidRootPart" then
+					v.Transparency = 1
+				end
+			end
+		end
+
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then
+			humanoid = Instance.new("Humanoid")
+			humanoid.Parent = char
+		end
+
+		humanoid.WalkSpeed = 30
+		humanoid.JumpPower = 70
+		humanoid.AutoRotate = true
+		humanoid.MaxHealth = 9e9
+		humanoid.Health = 9e9
+		humanoid.BreakJointsOnDeath = false
+
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			hrp = Instance.new("Part")
+			hrp.Name = "HumanoidRootPart"
+			hrp.Size = Vector3.new(2,2,1)
+			hrp.CanCollide = true
+			hrp.Parent = char
+			hrp.Transparency = 1
+		end
+
+		hrp.Anchored = false
+		hrp.CanCollide = true
+		hrp.Massless = false
+
+		char.PrimaryPart = hrp
+		char:PivotTo(oldHRP.CFrame)
+
+		Player.Character = char
+
+		workspace.CurrentCamera.CameraSubject = humanoid
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+
+		local animator = humanoid:FindFirstChildOfClass("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+
+		local soundPlayer = nil
+		local runTrack = nil
+		local currentTrack = nil
+		local busy = false
+
+		local function PlaySound(soundId, looped)
+			if soundPlayer and soundPlayer.Parent then
+				soundPlayer:Stop()
+				soundPlayer:Destroy()
+			end
+			soundPlayer = Instance.new("Sound")
+			soundPlayer.SoundId = soundId
+			soundPlayer.Volume = 5
+			soundPlayer.Looped = looped or false
+			soundPlayer.Parent = hrp
+			soundPlayer:Play()
+		end
+
+		local function StopSound()
+			if soundPlayer and soundPlayer.Parent then
+				soundPlayer:Stop()
+				soundPlayer:Destroy()
+				soundPlayer = nil
+			end
+		end
+
+		local function PlayRunAnim()
+			if runTrack and runTrack.IsPlaying then
+				runTrack:Stop()
+			end
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "rbxassetid://8286136040"
+			runTrack = animator:LoadAnimation(anim)
+			runTrack.Priority = Enum.AnimationPriority.Action
+			runTrack.Looped = true
+			runTrack:Play()
+		end
+
+		local function StopAllAnims()
+			if runTrack and runTrack.IsPlaying then
+				runTrack:Stop()
+			end
+			if currentTrack then
+				currentTrack:Stop()
+			end
+		end
+
+		local function PlayAnim(id, callback)
+			StopAllAnims()
+			local anim = Instance.new("Animation")
+			anim.AnimationId = id
+			currentTrack = animator:LoadAnimation(anim)
+			currentTrack.Priority = Enum.AnimationPriority.Action
+			currentTrack.Looped = false
+			currentTrack:Play()
+			if callback then
+				currentTrack.Stopped:Connect(callback)
+			end
+			return currentTrack
+		end
+
+		-- BUAT GUI
+		local ScreenGui = Instance.new("ScreenGui")
+		ScreenGui.Name = "SCPGui"
+		ScreenGui.ResetOnSpawn = false
+		ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+		local MainFrame = Instance.new("Frame")
+		MainFrame.Size = UDim2.new(0,250,0,400)
+		MainFrame.Position = UDim2.new(1,-260,0.5,-200)
+		MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+		MainFrame.BorderSizePixel = 0
+		MainFrame.Parent = ScreenGui
+
+		Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
+
+		local Title = Instance.new("TextLabel")
+		Title.Size = UDim2.new(1,0,0,40)
+		Title.Position = UDim2.new(0,0,0,0)
+		Title.Text = "FE SCP 096SL"
+		Title.TextScaled = false
+		Title.TextSize = 12
+		Title.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		Title.TextColor3 = Color3.fromRGB(255,0,0)
+		Title.Font = Enum.Font.GothamBold
+		Title.Parent = MainFrame
+		Instance.new("UICorner", Title).CornerRadius = UDim.new(0,0)
+
+		local ScrollingFrame = Instance.new("ScrollingFrame")
+		ScrollingFrame.Size = UDim2.new(1,0,1,-50)
+		ScrollingFrame.Position = UDim2.new(0,0,0,45)
+		ScrollingFrame.BackgroundTransparency = 1
+		ScrollingFrame.ScrollBarThickness = 8
+		ScrollingFrame.CanvasSize = UDim2.new(0,0,0,0)
+		ScrollingFrame.Parent = MainFrame
+
+		local UIListLayout = Instance.new("UIListLayout")
+		UIListLayout.Padding = UDim.new(0,10)
+		UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		UIListLayout.Parent = ScrollingFrame
+
+		local Toggle = Instance.new("TextButton")
+		Toggle.Size = UDim2.new(0,40,0,40)
+		Toggle.Position = UDim2.new(1,-45,0,-45)
+		Toggle.Text = "X"
+		Toggle.TextScaled = true
+		Toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
+		Toggle.TextColor3 = Color3.new(1,1,1)
+		Toggle.Parent = ScreenGui
+
+		Instance.new("UICorner", Toggle).CornerRadius = UDim.new(1,0)
+
+		local function CreateButton(name, callback)
+			local button = Instance.new("TextButton")
+			button.Size = UDim2.new(0,200,0,50)
+			button.Text = name
+			button.TextScaled = false
+			button.TextSize = 12
+			button.BackgroundColor3 = Color3.fromRGB(60,60,60)
+			button.TextColor3 = Color3.new(1,1,1)
+			button.Parent = ScrollingFrame
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0,10)
+			button.MouseButton1Click:Connect(callback)
+			return button
+		end
+
+		CreateButton("Run", function()
+			if busy then return end
+			PlayRunAnim()
+			PlaySound("rbxassetid://15283443061", true)
+		end)
+
+		CreateButton("Angry", function()
+			if busy then return end
+			busy = true
+			PlaySound("rbxassetid://15283443716", false)
+			PlayAnim("rbxassetid://8286121550", function()
+				PlayRunAnim()
+				PlaySound("rbxassetid://15283443061", true)
+				busy = false
+			end)
+		end)
+
+		CreateButton("Kill", function()
+			if busy then return end
+			busy = true
+			PlaySound("rbxassetid://15283442515", false)
+			PlayAnim("rbxassetid://8286133403", function()
+				busy = false
+			end)
+		end)
+
+		CreateButton("Stop All", function()
+			StopAllAnims()
+			StopSound()
+		end)
+
+		UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			ScrollingFrame.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y)
+		end)
+
+		Toggle.MouseButton1Click:Connect(function()
+			MainFrame.Visible = not MainFrame.Visible
+			Toggle.Text = MainFrame.Visible and "X" or "O"
+		end)
+	end,
+})	
+
+FeSectionLeft:NewButton({
+	Title = "FE SCP 096",
+	Callback = function()
+		local Players = game:GetService("Players")
+		local Player = Players.LocalPlayer
+		local RunService = game:GetService("RunService")
+
+		local oldChar = Player.Character or Player.CharacterAdded:Wait()
+		local oldHRP = oldChar:WaitForChild("HumanoidRootPart")
+
+		local model = workspace:FindFirstChild("SCP 096")
+		if not model then return end
+
+		local inner = model:FindFirstChild("SCP 096")
+		if not inner then return end
+
+		if oldChar then
+			oldChar:Destroy()
+		end
+
+		local char = inner:Clone()
+		char.Name = Player.Name
+		char.Parent = workspace
+
+		local hrp = nil
+
+		for _, v in pairs(char:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.Anchored = false
+				v.Massless = false
+				if v.Name == "HumanoidRootPart" then
+					v.Transparency = 1
+					v.CanCollide = true
+					hrp = v
+				else
+					v.CanCollide = false
+				end
+			end
+		end
+
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		if not humanoid then
+			humanoid = Instance.new("Humanoid")
+			humanoid.Parent = char
+		end
+
+		humanoid.WalkSpeed = 30
+		humanoid.JumpPower = 70
+		humanoid.AutoRotate = true
+		humanoid.MaxHealth = 9e9
+		humanoid.Health = 9e9
+		humanoid.BreakJointsOnDeath = false
+
+		RunService.Heartbeat:Connect(function()
+			if humanoid and humanoid.Parent and humanoid.Health ~= 9e9 then
+				humanoid.Health = 9e9
+			end
+		end)
+
+		if not hrp then
+			hrp = Instance.new("Part")
+			hrp.Name = "HumanoidRootPart"
+			hrp.Size = Vector3.new(2,2,1)
+			hrp.CanCollide = true
+			hrp.Transparency = 1
+			hrp.Parent = char
+		end
+
+		hrp.Anchored = false
+		hrp.CanCollide = true
+		hrp.Massless = false
+
+		char.PrimaryPart = hrp
+		char:PivotTo(oldHRP.CFrame)
+
+		Player.Character = char
+
+		workspace.CurrentCamera.CameraSubject = humanoid
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+
+		local animator = humanoid:FindFirstChildOfClass("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = humanoid
+		end
+
+		local soundPlayer = nil
+		local runTrack = nil
+		local standingTrack = nil
+		local currentTrack = nil
+		local busy = false
+
+		local function PlaySound(soundId, looped, volume)
+			if soundPlayer and soundPlayer.Parent then
+				soundPlayer:Stop()
+				soundPlayer:Destroy()
+			end
+			soundPlayer = Instance.new("Sound")
+			soundPlayer.SoundId = soundId
+			soundPlayer.Volume = volume or 5
+			soundPlayer.Looped = looped or false
+			soundPlayer.Parent = hrp
+			soundPlayer:Play()
+		end
+
+		local function StopSound()
+			if soundPlayer and soundPlayer.Parent then
+				soundPlayer:Stop()
+				soundPlayer:Destroy()
+				soundPlayer = nil
+			end
+		end
+
+		local function StopAllAnims()
+			if runTrack and runTrack.IsPlaying then
+				runTrack:Stop()
+			end
+			if standingTrack and standingTrack.IsPlaying then
+				standingTrack:Stop()
+			end
+			if currentTrack then
+				currentTrack:Stop()
+			end
+		end
+
+		local function PlayRunAnim()
+			StopAllAnims()
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "rbxassetid://8637420403"
+			runTrack = animator:LoadAnimation(anim)
+			runTrack.Priority = Enum.AnimationPriority.Action
+			runTrack.Looped = true
+			runTrack:Play()
+		end
+
+		local function PlayStandingAnim()
+			StopAllAnims()
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "rbxassetid://13918979019"
+			standingTrack = animator:LoadAnimation(anim)
+			standingTrack.Priority = Enum.AnimationPriority.Action
+			standingTrack.Looped = true
+			standingTrack:Play()
+		end
+
+		local function PlayAnim(id, callback)
+			local anim = Instance.new("Animation")
+			anim.AnimationId = id
+			currentTrack = animator:LoadAnimation(anim)
+			currentTrack.Priority = Enum.AnimationPriority.Action
+			currentTrack.Looped = false
+			currentTrack:Play()
+			if callback then
+				currentTrack.Stopped:Connect(callback)
+			end
+			return currentTrack
+		end
+
+		local ScreenGui = Instance.new("ScreenGui")
+		ScreenGui.Name = "SCPGui"
+		ScreenGui.ResetOnSpawn = false
+		ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+		local MainFrame = Instance.new("Frame")
+		MainFrame.Size = UDim2.new(0,180,0,300)
+		MainFrame.Position = UDim2.new(1,-190,0.5,-150)
+		MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+		MainFrame.BorderSizePixel = 0
+		MainFrame.Parent = ScreenGui
+
+		Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,8)
+
+		local Title = Instance.new("TextLabel")
+		Title.Size = UDim2.new(1,0,0,35)
+		Title.Position = UDim2.new(0,0,0,0)
+		Title.Text = "FE SCP 096"
+		Title.TextScaled = false
+		Title.TextSize = 14
+		Title.BackgroundColor3 = Color3.fromRGB(35,35,35)
+		Title.TextColor3 = Color3.fromRGB(255,100,100)
+		Title.Font = Enum.Font.GothamBold
+		Title.Parent = MainFrame
+
+		local ScrollingFrame = Instance.new("ScrollingFrame")
+		ScrollingFrame.Size = UDim2.new(1,0,1,-40)
+		ScrollingFrame.Position = UDim2.new(0,0,0,38)
+		ScrollingFrame.BackgroundTransparency = 1
+		ScrollingFrame.ScrollBarThickness = 6
+		ScrollingFrame.CanvasSize = UDim2.new(0,0,0,0)
+		ScrollingFrame.Parent = MainFrame
+
+		local UIListLayout = Instance.new("UIListLayout")
+		UIListLayout.Padding = UDim.new(0,8)
+		UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		UIListLayout.Parent = ScrollingFrame
+
+		local Toggle = Instance.new("TextButton")
+		Toggle.Size = UDim2.new(0,30,0,30)
+		Toggle.Position = UDim2.new(1,-35,0,-35)
+		Toggle.Text = "X"
+		Toggle.TextScaled = true
+		Toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		Toggle.TextColor3 = Color3.new(1,1,1)
+		Toggle.Parent = ScreenGui
+
+		Instance.new("UICorner", Toggle).CornerRadius = UDim.new(1,0)
+
+		local function CreateButton(name, callback)
+			local button = Instance.new("TextButton")
+			button.Size = UDim2.new(0,150,0,40)
+			button.Text = name
+			button.TextScaled = false
+			button.TextSize = 14
+			button.BackgroundColor3 = Color3.fromRGB(60,60,60)
+			button.TextColor3 = Color3.new(1,1,1)
+			button.Parent = ScrollingFrame
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0,8)
+			button.MouseButton1Click:Connect(callback)
+			return button
+		end
+
+		CreateButton("Run", function()
+			if busy then return end
+			PlayRunAnim()
+			PlaySound("rbxassetid://15283441112", true, 5)
+		end)
+
+		CreateButton("Standing", function()
+			if busy then return end
+			PlayStandingAnim()
+			PlaySound("rbxassetid://9161589557", true, 5)
+		end)
+
+		CreateButton("Panic", function()
+			if busy then return end
+			busy = true
+			StopAllAnims()
+			PlaySound("rbxassetid://15283462663", false, 1)
+			PlayAnim("rbxassetid://7333030605", function()
+				PlayAnim("rbxassetid://7333091977")
+			end)
+			task.wait(3)
+			busy = false
+		end)
+
+		CreateButton("Kill", function()
+			if busy then return end
+			busy = true
+			StopAllAnims()
+			PlaySound("rbxassetid://17878427121", false, 5)
+			PlaySound("rbxassetid://531421188", false, 5)
+			PlayAnim("rbxassetid://15172539171", function()
+				for _, plr in pairs(Players:GetPlayers()) do
+					if plr ~= Player and plr.Character then
+						local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+						if hum then
+							hum.Health = 0
+						end
+					end
+				end
+			end)
+			task.wait(2)
+			busy = false
+		end)
+
+		CreateButton("Stop All", function()
+			StopAllAnims()
+			StopSound()
+		end)
+
+		UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			ScrollingFrame.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y)
+		end)
+
+		Toggle.MouseButton1Click:Connect(function()
+			MainFrame.Visible = not MainFrame.Visible
+			Toggle.Text = MainFrame.Visible and "X" or "O"
+		end)
+	end,
+})
+
+local EspTab = Windows:NewTab({
+	Title = "ESP",
+	Description = "ESP",
+	Icon = "rbxassetid://10686484299"
+})
+
+local EspSectionLeft = EspTab:NewSection({
+	Title = "ESP Player & SCP",
+	Icon = "rbxassetid://10686484299",
+	Position = "Left"
+})
+
+local EspSectionRight = EspTab:NewSection({
+	Title = "Visual",
+	Icon = "rbxassetid://10686484299",
+	Position = "Right"
+})
+
+local ESPActive = false
+local ESPObjects = {}
+local ESPConnection = nil
+
+local function CreateESP(plr)
+	if plr == Plr then return end
+	local char = plr.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+	local highlight = Instance.new("Highlight")
+	highlight.FillColor = Color3.fromRGB(255, 0, 0)
+	highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+	highlight.FillTransparency = 0.5
+	highlight.OutlineTransparency = 0
+	highlight.Parent = char
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ESP_Name"
+	billboard.Size = UDim2.new(0, 200, 0, 50)
+	billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = char
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = plr.Name
+	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	text.TextStrokeTransparency = 0
+	text.TextScaled = true
+	text.Font = Enum.Font.GothamBold
+	text.Parent = billboard
+	ESPObjects[plr] = {highlight, billboard}
+end
+
+local function RemoveESP(plr)
+	if ESPObjects[plr] then
+		for _, obj in pairs(ESPObjects[plr]) do
+			if obj and obj.Parent then
+				obj:Destroy()
+			end
+		end
+		ESPObjects[plr] = nil
+	end
+end
+
+local function UpdateAllESP()
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if ESPActive and plr ~= Plr then
+			if plr.Character and plr.Character.Parent then
+				if not ESPObjects[plr] then
+					CreateESP(plr)
+				end
+			else
+				RemoveESP(plr)
+			end
+		else
+			RemoveESP(plr)
+		end
+	end
+end
+
+EspSectionLeft:NewToggle({
+	Title = "ESP Player",
+	Default = false,
+	Callback = function(state)
+		ESPActive = state
+		if state then
+			if ESPConnection then
+				ESPConnection:Disconnect()
+			end
+			ESPConnection = RunService.RenderStepped:Connect(UpdateAllESP)
+			UpdateAllESP()
+		else
+			if ESPConnection then
+				ESPConnection:Disconnect()
+				ESPConnection = nil
+			end
+			for plr in pairs(ESPObjects) do
+				RemoveESP(plr)
+			end
+		end
+	end,
+})
+
+-- ESP SCP (HANYA MODEL, BUKAN FOLDER)
+local EspSCPActive = false
+local EspSCPObjects = {}
+local EspSCPConnection = nil
+
+local function CreateESPSCP(obj)
+	if EspSCPObjects[obj] then return end
+	
+	local highlight = Instance.new("Highlight")
+	highlight.FillColor = Color3.fromRGB(0, 255, 0)
+	highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+	highlight.FillTransparency = 0.3
+	highlight.OutlineTransparency = 0
+	highlight.Parent = obj
+	
+	local billboard = Instance.new("BillboardGui")
+	billboard.Size = UDim2.new(0, 150, 0, 40)
+	billboard.StudsOffset = Vector3.new(0, 2, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = obj
+	
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = obj.Name
+	text.TextColor3 = Color3.fromRGB(0, 255, 0)
+	text.TextStrokeTransparency = 0
+	text.TextScaled = true
+	text.Font = Enum.Font.GothamBold
+	text.Parent = billboard
+	
+	EspSCPObjects[obj] = {highlight, billboard}
+end
+
+local function RemoveESPSCP(obj)
+	if EspSCPObjects[obj] then
+		for _, v in pairs(EspSCPObjects[obj]) do
+			if v and v.Parent then
+				v:Destroy()
+			end
+		end
+		EspSCPObjects[obj] = nil
+	end
+end
+
+local function GetAllSCPModels()
+	local scpList = {}
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("Model") and v.Name:upper():sub(1, 3) == "SCP" then
+			table.insert(scpList, v)
+		end
+	end
+	return scpList
+end
+
+local function UpdateAllESPSCP()
+	local scpList = GetAllSCPModels()
+	local currentSCP = {}
+	
+	for _, scp in pairs(scpList) do
+		currentSCP[scp] = true
+		if EspSCPActive then
+			if not EspSCPObjects[scp] then
+				CreateESPSCP(scp)
+			end
+		end
+	end
+	
+	for obj in pairs(EspSCPObjects) do
+		if not currentSCP[obj] then
+			RemoveESPSCP(obj)
+		end
+	end
+end
+
+EspSectionLeft:NewToggle({
+	Title = "ESP SCP",
+	Default = false,
+	Callback = function(state)
+		EspSCPActive = state
+		if state then
+			if EspSCPConnection then
+				EspSCPConnection:Disconnect()
+			end
+			EspSCPConnection = RunService.RenderStepped:Connect(UpdateAllESPSCP)
+			UpdateAllESPSCP()
+		else
+			if EspSCPConnection then
+				EspSCPConnection:Disconnect()
+				EspSCPConnection = nil
+			end
+			for obj in pairs(EspSCPObjects) do
+				RemoveESPSCP(obj)
+			end
+		end
+	end,
+})
+
+-- VISUAL
+local FullbrightActive = false
+local OriginalBrightness = game.Lighting.Brightness
+local OriginalClockTime = game.Lighting.ClockTime
+local OriginalFogEnd = game.Lighting.FogEnd
+local OriginalGlobalShadows = game.Lighting.GlobalShadows
+local OriginalAmbient = game.Lighting.Ambient
+
+EspSectionRight:NewToggle({
+	Title = "Fullbright",
+	Default = false,
+	Callback = function(state)
+		FullbrightActive = state
+		if state then
+			game.Lighting.Brightness = 2
+			game.Lighting.ClockTime = 14
+			game.Lighting.FogEnd = 100000
+			game.Lighting.GlobalShadows = false
+			game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+		else
+			game.Lighting.Brightness = OriginalBrightness
+			game.Lighting.ClockTime = OriginalClockTime
+			game.Lighting.FogEnd = OriginalFogEnd
+			game.Lighting.GlobalShadows = OriginalGlobalShadows
+			game.Lighting.Ambient = OriginalAmbient
+		end
+	end,
+})
+
+local NoFogActive = false
+local OriginalFogEndSave = game.Lighting.FogEnd
+local OriginalFogStart = game.Lighting.FogStart
+
+EspSectionRight:NewToggle({
+	Title = "No Fog",
+	Default = false,
+	Callback = function(state)
+		NoFogActive = state
+		if state then
+			game.Lighting.FogEnd = 999999
+			game.Lighting.FogStart = 999999
+		else
+			game.Lighting.FogEnd = OriginalFogEndSave
+			game.Lighting.FogStart = OriginalFogStart
+		end
+	end,
+})
+
+local NoShakeActive = false
+local OriginalCFrame = nil
+local ShakeConnection = nil
+
+EspSectionRight:NewToggle({
+	Title = "No Shaking Camera",
+	Default = false,
+	Callback = function(state)
+		NoShakeActive = state
+		if state then
+			if ShakeConnection then
+				ShakeConnection:Disconnect()
+			end
+			ShakeConnection = RunService.RenderStepped:Connect(function()
+				if NoShakeActive then
+					local camera = workspace.CurrentCamera
+					if camera and camera.CFrame ~= OriginalCFrame then
+						if OriginalCFrame then
+							camera.CFrame = OriginalCFrame
+						else
+							OriginalCFrame = camera.CFrame
+						end
+					end
+				end
+			end)
+		else
+			if ShakeConnection then
+				ShakeConnection:Disconnect()
+				ShakeConnection = nil
+			end
+			OriginalCFrame = nil
+		end
+	end,
+})
+
+local AutoTab = Windows:NewTab({
+	Title = "Automatic",
+	Description = "Automatic",
+	Icon = "rbxassetid://7237720170"
+})
+
+local SectionLeft = AutoTab:NewSection({
+	Title = "Automatic",
+	Icon = "rbxassetid://7237720170",
+	Position = "Left"
+})
+
+local InstantInteractActive = false
+local HoldDuration = 0.01
+local InstantConnection = nil
+
+SectionLeft:NewSlider({
+    Title = "Hold Duration",
+    Min = 0.01,
+    Max = 100,
+    Default = 5,
+    Precision = 2,
+    Callback = function(Value)
+        HoldDuration = Value
+    end,
+})
+
+SectionLeft:NewToggle({
+    Title = "Instant Interact",
+    Default = false,
+    Callback = function(state)
+        InstantInteractActive = state
+        
+        if state then
+            if InstantConnection then
+                InstantConnection:Disconnect()
+            end
+            
+            InstantConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                local Plr = game.Players.LocalPlayer
+                local Mouse = Plr:GetMouse()
+                local target = Mouse.Target
+                
+                if target then
+                    local detector = target:FindFirstChild("ClickDetector")
+                    if detector then
+                        detector:Click(Mouse)
+                    end
+                    
+                    local prompt = target:FindFirstChild("ProximityPrompt")
+                    if prompt then
+                        prompt:InputHold()
+                        task.wait(HoldDuration)
+                        prompt:InputRelease()
+                    end
+                end
+            end)
+        else
+            if InstantConnection then
+                InstantConnection:Disconnect()
+                InstantConnection = nil
+            end
+        end
+    end,
+})
+
+local MiscTab = Windows:NewTab({
+	Title = "Misc",
+	Description = "Misc",
+	Icon = "rbxassetid://16717281575"
+})
+
+local MiscSectionLeft = MiscTab:NewSection({
+	Title = "Misc",
+	Icon = "rbxassetid://16717281575",
+	Position = "Left"
+})
+
+local function ServerHop()
+	local PlaceId = game.PlaceId
+	local Http = game:GetService("HttpService")
+	local Teleport = game:GetService("TeleportService")
+	local Player = game.Players.LocalPlayer
+	
+	local success, response = pcall(function()
+		return Http:GetAsync("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?limit=100")
+	end)
+	
+	if not success then return end
+	
+	local servers = Http:JSONDecode(response).data
+	local currentServerId = game.JobId
+	
+	for _, server in pairs(servers) do
+		if server.id ~= currentServerId and server.playing < 26 then
+			Teleport:TeleportToPlaceInstance(PlaceId, server.id, Player)
+			return
+		end
+	end
+	
+	Teleport:Teleport(PlaceId)
+end
+
+MiscSectionLeft:NewButton({
+	Title = "Server Hop",
+	Callback = function()
+		ServerHop()
+	end,
+})
+
+MiscSectionLeft:NewButton({
+	Title = "Crash You Roblox (Not Recommended)",
+	Callback = function()
+		task.spawn(function()
+			local count = 0
+			while true do
+				count = count + 1
+				
+				print("[PRINT] DEEPSEEK MAV VAL-V2 - " .. count)
+				task.wait(0.05)
+				
+				warn("[WARN] SCRIPT GAMING | SCP GAMES - " .. count)
+				task.wait(0.05)
+				
+				error("[ERROR] Something went wrong - " .. count)
+				task.wait(0.05)
+				
+				print("[SUCCESS] Script executed successfully - " .. count)
+				task.wait(0.05)
+			end
+		end)
+	end,
+})
