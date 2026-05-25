@@ -255,20 +255,13 @@ SectionRight:NewButton({
 	end,
 })
 
-SectionRight:NewButton({
-	Title = "SL 096 PANIC",
-	Callback = function()
-		PlayOnceSound("rbxassetid://15283443716")
-	end,
-})
-
 local FETab = Windows:NewTab({
 	Title = "FE",
 	Description = "FE",
 	Icon = "rbxassetid://0"
 })
 
-local FeSectionLeft = EspTab:NewSection({
+local FeSectionLeft = FeTab:NewSection({
 	Title = "FE",
 	Icon = "rbxassetid://0",
 	Position = "Left"
