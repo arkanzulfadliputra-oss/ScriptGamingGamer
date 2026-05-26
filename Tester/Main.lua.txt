@@ -486,8 +486,8 @@ FeSectionLeft:NewButton({
 		CreateButton("Crying", function()
 			if busy then return end
 			busy = true
-			PlaySound("rbxassetid://9098018961", true, 5)
-			PlayAnim("rbxassetid://9161977567", true, function()
+			PlaySound("rbxassetid://9161977567", true, 5)
+			PlayAnim("rbxassetid://9098018961", true, function()
 				busy = false
 			end)
 		end)
