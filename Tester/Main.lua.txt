@@ -267,7 +267,7 @@ local FeSectionLeft = FETab:NewSection({
 	Position = "Left"
 })
 
-SectionLeft:NewButton({
+FeSectionLeft:NewButton({
 	Title = "FE SCP 096SL",
 	Callback = function()
 		local Players = game:GetService("Players")
