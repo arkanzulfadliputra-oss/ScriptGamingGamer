@@ -267,8 +267,8 @@ local FeSectionLeft = FETab:NewSection({
 	Position = "Left"
 })
 
-FeSectionLeft:NewButton({
-	Title = "FE SCP 096SL(Edit In Slider Walkspeed)",
+SectionLeft:NewButton({
+	Title = "FE SCP 096SL",
 	Callback = function()
 		local Players = game:GetService("Players")
 		local Player = Players.LocalPlayer
@@ -291,13 +291,18 @@ FeSectionLeft:NewButton({
 		char.Name = Player.Name
 		char.Parent = workspace
 
+		local hrp = nil
+
 		for _, v in pairs(char:GetDescendants()) do
 			if v:IsA("BasePart") then
 				v.Anchored = false
-				v.CanCollide = true
 				v.Massless = false
 				if v.Name == "HumanoidRootPart" then
 					v.Transparency = 1
+					v.CanCollide = true
+					hrp = v
+				else
+					v.CanCollide = false
 				end
 			end
 		end
@@ -312,14 +317,13 @@ FeSectionLeft:NewButton({
 		humanoid.JumpPower = 70
 		humanoid.AutoRotate = true
 
-		local hrp = char:FindFirstChild("HumanoidRootPart")
 		if not hrp then
 			hrp = Instance.new("Part")
 			hrp.Name = "HumanoidRootPart"
 			hrp.Size = Vector3.new(2,2,1)
 			hrp.CanCollide = true
-			hrp.Parent = char
 			hrp.Transparency = 1
+			hrp.Parent = char
 		end
 
 		hrp.Anchored = false
@@ -345,14 +349,14 @@ FeSectionLeft:NewButton({
 		local currentTrack = nil
 		local busy = false
 
-		local function PlaySound(soundId, looped)
+		local function PlaySound(soundId, looped, volume)
 			if soundPlayer and soundPlayer.Parent then
 				soundPlayer:Stop()
 				soundPlayer:Destroy()
 			end
 			soundPlayer = Instance.new("Sound")
 			soundPlayer.SoundId = soundId
-			soundPlayer.Volume = 5
+			soundPlayer.Volume = volume or 5
 			soundPlayer.Looped = looped or false
 			soundPlayer.Parent = hrp
 			soundPlayer:Play()
@@ -366,18 +370,6 @@ FeSectionLeft:NewButton({
 			end
 		end
 
-		local function PlayRunAnim()
-			if runTrack and runTrack.IsPlaying then
-				runTrack:Stop()
-			end
-			local anim = Instance.new("Animation")
-			anim.AnimationId = "rbxassetid://8286136040"
-			runTrack = animator:LoadAnimation(anim)
-			runTrack.Priority = Enum.AnimationPriority.Action
-			runTrack.Looped = true
-			runTrack:Play()
-		end
-
 		local function StopAllAnims()
 			if runTrack and runTrack.IsPlaying then
 				runTrack:Stop()
@@ -387,13 +379,23 @@ FeSectionLeft:NewButton({
 			end
 		end
 
-		local function PlayAnim(id, callback)
+		local function PlayRunAnim()
+			StopAllAnims()
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "rbxassetid://8286136040"
+			runTrack = animator:LoadAnimation(anim)
+			runTrack.Priority = Enum.AnimationPriority.Action
+			runTrack.Looped = true
+			runTrack:Play()
+		end
+
+		local function PlayAnim(id, looped, callback)
 			StopAllAnims()
 			local anim = Instance.new("Animation")
 			anim.AnimationId = id
 			currentTrack = animator:LoadAnimation(anim)
 			currentTrack.Priority = Enum.AnimationPriority.Action
-			currentTrack.Looped = false
+			currentTrack.Looped = looped or false
 			currentTrack:Play()
 			if callback then
 				currentTrack.Stopped:Connect(callback)
@@ -401,15 +403,14 @@ FeSectionLeft:NewButton({
 			return currentTrack
 		end
 
-		-- BUAT GUI
 		local ScreenGui = Instance.new("ScreenGui")
 		ScreenGui.Name = "SCPGui"
 		ScreenGui.ResetOnSpawn = false
 		ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 
 		local MainFrame = Instance.new("Frame")
-		MainFrame.Size = UDim2.new(0,250,0,400)
-		MainFrame.Position = UDim2.new(1,-260,0.5,-200)
+		MainFrame.Size = UDim2.new(0,250,0,450)
+		MainFrame.Position = UDim2.new(1,-260,0.5,-225)
 		MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 		MainFrame.BorderSizePixel = 0
 		MainFrame.Parent = ScreenGui
@@ -426,7 +427,6 @@ FeSectionLeft:NewButton({
 		Title.TextColor3 = Color3.fromRGB(255,0,0)
 		Title.Font = Enum.Font.GothamBold
 		Title.Parent = MainFrame
-		Instance.new("UICorner", Title).CornerRadius = UDim.new(0,0)
 
 		local ScrollingFrame = Instance.new("ScrollingFrame")
 		ScrollingFrame.Size = UDim2.new(1,0,1,-50)
@@ -469,16 +469,25 @@ FeSectionLeft:NewButton({
 		CreateButton("Run", function()
 			if busy then return end
 			PlayRunAnim()
-			PlaySound("rbxassetid://15283443061", true)
+			PlaySound("rbxassetid://15283443061", true, 5)
 		end)
 
 		CreateButton("Angry", function()
 			if busy then return end
 			busy = true
-			PlaySound("rbxassetid://15283443716", false)
-			PlayAnim("rbxassetid://8286121550", function()
+			PlaySound("rbxassetid://15283443716", false, 5)
+			PlayAnim("rbxassetid://8286121550", false, function()
 				PlayRunAnim()
-				PlaySound("rbxassetid://15283443061", true)
+				PlaySound("rbxassetid://15283443061", true, 5)
+				busy = false
+			end)
+		end)
+
+		CreateButton("Crying", function()
+			if busy then return end
+			busy = true
+			PlaySound("rbxassetid://9098018961", true, 5)
+			PlayAnim("rbxassetid://9161977567", true, function()
 				busy = false
 			end)
 		end)
@@ -486,8 +495,8 @@ FeSectionLeft:NewButton({
 		CreateButton("Kill", function()
 			if busy then return end
 			busy = true
-			PlaySound("rbxassetid://15283442515", false)
-			PlayAnim("rbxassetid://8286133403", function()
+			PlaySound("rbxassetid://15283442515", false, 5)
+			PlayAnim("rbxassetid://8286133403", false, function()
 				busy = false
 			end)
 		end)
@@ -506,7 +515,7 @@ FeSectionLeft:NewButton({
 			Toggle.Text = MainFrame.Visible and "X" or "O"
 		end)
 	end,
-})	
+})
 
 FeSectionLeft:NewButton({
 	Title = "FE SCP 096",
@@ -1183,23 +1192,213 @@ MiscSectionLeft:NewButton({
 MiscSectionLeft:NewButton({
 	Title = "Crash You Roblox (Not Recommended)",
 	Callback = function()
-		task.spawn(function()
-			local count = 0
-			while true do
-				count = count + 1
-				
-				print("[PRINT] DEEPSEEK MAV VAL-V2 - " .. count)
-				task.wait(0.05)
-				
-				warn("[WARN] SCRIPT GAMING | SCP GAMES - " .. count)
-				task.wait(0.05)
-				
-				error("[ERROR] Something went wrong - " .. count)
-				task.wait(0.05)
-				
-				print("[SUCCESS] Script executed successfully - " .. count)
-				task.wait(0.05)
-			end
-		end)
+		while true do
+    print("SPAM PRINT")
+    print("Crash")
+print("Crash")
+print("Crash")
+print("Crash")
+end	 
 	end,
+})
+
+MiscSectionLeft:NewTitle('🎵 Sound Settings')
+
+MiscSectionLeft:NewToggle({
+    Title = "Enable Notify",
+    Default = false,
+    Callback = function(tr)
+        _G.NotifyEnabled = tr
+    end,
+})
+
+MiscSectionLeft:NewSlider({
+    Title = "Volume",
+    Min = 0,
+    Max = 100,
+    Default = 50,
+    Callback = function(value)
+        _G.Volume = value / 100
+    end,
+})
+
+MiscSectionLeft:NewDropdown({
+    Title = "Sound",
+    Values = {"Discord", "Window 10", "Window XP"},
+    Default = "Discord",
+    Callback = function(value)
+        _G.SelectedSound = value
+        if value == "Discord" then
+            _G.SoundId = "18501882001"
+        elseif value == "Window 10" then
+            _G.SoundId = "8708139245"
+        elseif value == "Window XP" then
+            _G.SoundId = "138365624960402"
+        end
+    end,
+})
+
+MiscSectionLeft:NewButton({
+    Title = "Play Sound",
+    Callback = function()
+        if not _G.SoundId then
+            _G.SoundId = "18501882001"
+        end
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. _G.SoundId
+        sound.Volume = _G.Volume or 0.5
+        sound.Parent = game:GetService("Workspace")
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 5)
+    end,
+})
+
+MiscSectionLeft:NewButton({
+    Title = "Set Notify",
+    Callback = function()
+        if _G.NotifyHooked then return end
+        
+        _G.NotifyHooked = true
+        
+        local lib = getgenv().Lib or getgenv().UI_LIB or _G.UI_LIB
+        if lib then
+            local oldNotify = lib.Notify or lib.Notification or lib.MakeNotification
+            if oldNotify then
+                lib.Notify = function(...)
+                    if _G.NotifyEnabled then
+                        local sound = Instance.new("Sound")
+                        sound.SoundId = "rbxassetid://" .. (_G.SoundId or "18501882001")
+                        sound.Volume = _G.Volume or 0.5
+                        sound.Parent = game:GetService("Workspace")
+                        sound:Play()
+                        game:GetService("Debris"):AddItem(sound, 5)
+                    end
+                    return oldNotify(...)
+                end
+            end
+        end
+    end,
+})
+
+MiscSectionLeft:NewButton({
+    Title = "Open Console",
+    Callback = function()
+        game:GetService("StarterGui"):SetCore("DevConsoleVisible", true)
+    end,
+})
+
+MiscSectionLeft:NewToggle({
+    Title = "Show FPS",
+    Default = false,
+    Callback = function(tr)
+        if tr then
+            local RunService = game:GetService("RunService")
+            local Players = game:GetService("Players")
+            local LocalPlayer = Players.LocalPlayer
+            
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "FPS_Display"
+            screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+            
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Size = UDim2.new(0, 150, 0, 30)
+            textLabel.Position = UDim2.new(0, 10, 0, 10)
+            textLabel.BackgroundTransparency = 0.5
+            textLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+            textLabel.TextColor3 = Color3.new(0, 1, 0)
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextSize = 18
+            textLabel.Text = "FPS: --"
+            textLabel.Parent = screenGui
+            
+            local lastTime = tick()
+            local frameCount = 0
+            
+            local connection
+            connection = RunService.RenderStepped:Connect(function()
+                frameCount = frameCount + 1
+                local currentTime = tick()
+                
+                if currentTime - lastTime >= 1 then
+                    local fps = frameCount
+                    textLabel.Text = "FPS: " .. fps
+                    
+                    if fps >= 60 then
+                        textLabel.TextColor3 = Color3.new(0, 1, 0)
+                    elseif fps >= 30 then
+                        textLabel.TextColor3 = Color3.new(1, 1, 0)
+                    else
+                        textLabel.TextColor3 = Color3.new(1, 0, 0)
+                    end
+                    
+                    frameCount = 0
+                    lastTime = currentTime
+                end
+            end)
+            
+            _G.FPSConnection = connection
+            _G.FPSGui = screenGui
+            
+        else
+            if _G.FPSConnection then
+                _G.FPSConnection:Disconnect()
+                _G.FPSConnection = nil
+            end
+            if _G.FPSGui then
+                _G.FPSGui:Destroy()
+                _G.FPSGui = nil
+            end
+        end
+    end,
+})
+
+MiscSectionLeft:NewToggle({
+    Title = "Show Coordinates",
+    Default = false,
+    Callback = function(tr)
+        if tr then
+            local Players = game:GetService("Players")
+            local LocalPlayer = Players.LocalPlayer
+            local RunService = game:GetService("RunService")
+            
+            local screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "Coord_Display"
+            screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+            
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Size = UDim2.new(0, 220, 0, 30)
+            textLabel.Position = UDim2.new(0, 10, 0, 50)
+            textLabel.BackgroundTransparency = 0.5
+            textLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+            textLabel.TextColor3 = Color3.new(0, 255, 255)
+            textLabel.Font = Enum.Font.SourceSansBold
+            textLabel.TextSize = 18
+            textLabel.Text = "X: 0 | Y: 0 | Z: 0"
+            textLabel.Parent = screenGui
+            
+            local connection
+            connection = RunService.RenderStepped:Connect(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local pos = char.HumanoidRootPart.Position
+                    textLabel.Text = string.format("X: %.1f | Y: %.1f | Z: %.1f", pos.X, pos.Y, pos.Z)
+                else
+                    textLabel.Text = "X: -- | Y: -- | Z: --"
+                end
+            end)
+            
+            _G.CoordConnection = connection
+            _G.CoordGui = screenGui
+            
+        else
+            if _G.CoordConnection then
+                _G.CoordConnection:Disconnect()
+                _G.CoordConnection = nil
+            end
+            if _G.CoordGui then
+                _G.CoordGui:Destroy()
+                _G.CoordGui = nil
+            end
+        end
+    end,
 })
