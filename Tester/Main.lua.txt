@@ -483,15 +483,6 @@ FeSectionLeft:NewButton({
 			end)
 		end)
 
-		CreateButton("Crying", function()
-			if busy then return end
-			busy = true
-			PlaySound("rbxassetid://9161977567", true, 5)
-			PlayAnim("rbxassetid://8286128730", true, function()
-				busy = false
-			end)
-		end)
-
 		CreateButton("Kill", function()
 			if busy then return end
 			busy = true
@@ -673,7 +664,7 @@ FeSectionLeft:NewButton({
 				currentTrack.Stopped:Connect(callback)
 			end
 			return currentTrack
-		end
+		endw
 
 		local ScreenGui = Instance.new("ScreenGui")
 		ScreenGui.Name = "SCPGui"
