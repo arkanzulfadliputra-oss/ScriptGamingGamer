@@ -742,36 +742,53 @@ FeSectionLeft:NewButton({
 		end)
 
 		CreateButton("Panic", function()
-			if busy then return end
-			busy = true
-			StopAllAnims()
-			PlaySound("rbxassetid://15283462663", false, 1)
-			PlayAnim("rbxassetid://7333030605", function()
-				PlayAnim("rbxassetid://7333091977")
-			end)
+	if busy then
+		return
+	end
+
+	busy = true
+
+	StopAllAnims()
+
+	local sound = PlaySound("rbxassetid://15283462663", false, 1)
+
+	PlayAnim("rbxassetid://7333030605", function()
+
+		local loopAnim = PlayAnim("rbxassetid://7333091977")
+
+		if sound and sound.TimeLength > 0 then
+			task.wait(sound.TimeLength)
+		else
 			task.wait(3)
-			busy = false
-		end)
+		end
+
+		if loopAnim then
+			loopAnim:Stop()
+		end
+
+		busy = false
+	end)
+end)
 
 		CreateButton("Kill", function()
-			if busy then return end
-			busy = true
-			StopAllAnims()
-			PlaySound("rbxassetid://17878427121", false, 5)
-			PlaySound("rbxassetid://531421188", false, 5)
-			PlayAnim("rbxassetid://15172539171", function()
-				for _, plr in pairs(Players:GetPlayers()) do
-					if plr ~= Player and plr.Character then
-						local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-						if hum then
-							hum.Health = 0
-						end
-					end
-				end
-			end)
-			task.wait(2)
-			busy = false
-		end)
+	if busy then
+		return
+	end
+
+	busy = true
+
+	StopAllAnims()
+
+	PlaySound("rbxassetid://17878427121", false, 5)
+	PlaySound("rbxassetid://531421188", false, 5)
+
+	PlayAnim("rbxassetid://15172539171", function()
+	end)
+
+	task.wait(2)
+
+	busy = false
+end)
 
 		CreateButton("Stop All", function()
 			StopAllAnims()
