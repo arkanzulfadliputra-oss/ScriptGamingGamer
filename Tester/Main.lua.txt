@@ -1393,3 +1393,5 @@ MiscSectionLeft:NewToggle({
         end
     end,
 })
+
+print("hello")
