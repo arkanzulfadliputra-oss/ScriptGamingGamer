@@ -664,7 +664,7 @@ FeSectionLeft:NewButton({
 				currentTrack.Stopped:Connect(callback)
 			end
 			return currentTrack
-		endw
+		end
 
 		local ScreenGui = Instance.new("ScreenGui")
 		ScreenGui.Name = "SCPGui"
