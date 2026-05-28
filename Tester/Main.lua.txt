@@ -1232,7 +1232,7 @@ MiscSectionLeft:NewSlider({
 
 MiscSectionLeft:NewDropdown({
     Title = "Sound",
-    Values = {"Discord", "Window 10", "Window XP"},
+    Data = {'Discord', 'Window 10', 'Window XP'},
     Default = "Discord",
     Callback = function(value)
         _G.SelectedSound = value
