@@ -1,0 +1,1030 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Steal A Fish | Hub",
+    Icon = 0,
+    LoadingTitle = "Steal A Fish Hub",
+    LoadingSubtitle = "By Script Gaming",
+    Theme = "Default",
+    ConfigurationSaving = {
+        Enabled = true,
+        FileName = "StealAFishHub"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "noinvite",
+        RememberJoins = true
+    },
+    KeySystem = false
+})
+
+local MainTab = Window:CreateTab("Main", 4483362458)
+local AutoTab = Window:CreateTab("Automatic", 4483362458)
+local ESPTab = Window:CreateTab("ESP", 4483362458)
+local StealTab = Window:CreateTab("Stealing(Not Work)", 4483362458)
+local TeleportTab = Window:CreateTab("Teleport")
+local MiscTab = Window:CreateTab("Misc", 4483362458)
+local MainSection = MainTab:CreateSection("Main")
+local AutoSection = AutoTab:CreateSection("Auto")
+local ESPSection = ESPTab:CreateSection("ESP")
+local StealSection = StealTab:CreateSection("Stealing")
++local TeleSection = TeleportTab:CreateSection("Teleport")
+local MiscSection = MiscTab:CreateSection("Misc")
+
+local player = game.Players.LocalPlayer
+local walkspeedEnabled = false
+local currentSpeed = 16
+local antiResetLoop = nil
+
+local function setWalkspeed(speed)
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = speed
+        end
+    end
+end
+
+local function startAntiReset()
+    if antiResetLoop then task.cancel(antiResetLoop) end
+    antiResetLoop = task.spawn(function()
+        while walkspeedEnabled do
+            task.wait(0.1)
+            local char = player.Character
+            if char then
+                local humanoid = char:FindFirstChild("Humanoid")
+                if humanoid and humanoid.WalkSpeed ~= currentSpeed then
+                    humanoid.WalkSpeed = currentSpeed
+                end
+            end
+        end
+    end)
+end
+
+local function stopAntiReset()
+    if antiResetLoop then
+        task.cancel(antiResetLoop)
+        antiResetLoop = nil
+    end
+end
+
+MainTab:CreateToggle({
+    Name = "Toggle Walkspeed",
+    CurrentValue = false,
+    Callback = function(Value)
+        walkspeedEnabled = Value
+        if Value then
+            setWalkspeed(currentSpeed)
+        else
+            setWalkspeed(16)
+            stopAntiReset()
+        end
+    end
+})
+
+MainTab:CreateToggle({
+    Name = "Toggle Walkspeed (Anti Reset)",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value then
+            walkspeedEnabled = true
+            setWalkspeed(currentSpeed)
+            startAntiReset()
+        else
+            walkspeedEnabled = false
+            setWalkspeed(16)
+            stopAntiReset()
+        end
+    end
+})
+
+MainTab:CreateSlider({
+    Name = "Slider Speed",
+    Range = {16, 250},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 50,
+    Callback = function(Value)
+        currentSpeed = Value
+        if walkspeedEnabled then
+            setWalkspeed(currentSpeed)
+        end
+    end
+})
+
+local noclipEnabled = false
+local noclipLoop = nil
+
+local function startNoclip()
+    if noclipLoop then return end
+    
+    noclipLoop = task.spawn(function()
+        while noclipEnabled do
+            local char = game.Players.LocalPlayer.Character
+            if char then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function stopNoclip()
+    if noclipLoop then
+        task.cancel(noclipLoop)
+        noclipLoop = nil
+    end
+    
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
+MainTab:CreateToggle({
+    Name = "Toggle Noclip",
+    CurrentValue = false,
+    Callback = function(Value)
+        noclipEnabled = Value
+        if Value then
+            startNoclip()
+        else
+            stopNoclip()
+        end
+    end
+})
+
+local jumpPowerEnabled = false
+local currentJumpPower = 50
+local originalJumpPower = nil
+
+local function setJumpPower(power)
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            if not originalJumpPower then
+                originalJumpPower = humanoid.JumpPower
+            end
+            humanoid.JumpPower = power
+        end
+    end
+end
+
+local function resetJumpPower()
+    local player = game.Players.LocalPlayer
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = originalJumpPower or 50
+        end
+    end
+end
+
+local function onCharacterAdded(char)
+    char:WaitForChild("Humanoid")
+    if jumpPowerEnabled then
+        setJumpPower(currentJumpPower)
+    end
+end
+
+MainTab:CreateToggle({
+    Name = "Toggle JumpPower",
+    CurrentValue = false,
+    Callback = function(Value)
+        jumpPowerEnabled = Value
+        if Value then
+            setJumpPower(currentJumpPower)
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "JumpPower",
+                Text = "Activated! Power: " .. currentJumpPower,
+                Duration = 2
+            })
+        else
+            resetJumpPower()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "JumpPower",
+                Text = "Deactivated!",
+                Duration = 1
+            })
+        end
+    end
+})
+
+MainTab:CreateSlider({
+    Name = "Slider JumpPower",
+    Range = {0, 250},
+    Increment = 1,
+    Suffix = "Power",
+    CurrentValue = 50,
+    Callback = function(Value)
+        currentJumpPower = Value
+        if jumpPowerEnabled then
+            setJumpPower(currentJumpPower)
+        end
+    end
+})
+
+game.Players.LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+local Divider = MainTab:CreateDivider()
+
+local Label = MainTab:CreateLabel("Base", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+
+local instantInteractEnabled = false
+local currentHoldDuration = 0.1
+local originalHoldDuration = {}
+
+local function saveOriginalValue(prompt)
+    if originalHoldDuration[prompt] == nil then
+        originalHoldDuration[prompt] = prompt.HoldDuration
+    end
+end
+
+local function getAllPrompts()
+    local prompts = {}
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("ProximityPrompt") then
+            table.insert(prompts, obj)
+        end
+    end
+    return prompts
+end
+
+local function startInstantInteract()
+    local prompts = getAllPrompts()
+    for _, prompt in ipairs(prompts) do
+        saveOriginalValue(prompt)
+        prompt.HoldDuration = currentHoldDuration
+    end
+end
+
+local function stopInstantInteract()
+    for prompt, originalValue in pairs(originalHoldDuration) do
+        if prompt and prompt.Parent then
+            prompt.HoldDuration = originalValue
+        end
+    end
+    originalHoldDuration = {}
+end
+
+local function onDescendantAdded(instance)
+    if instantInteractEnabled and instance:IsA("ProximityPrompt") then
+        saveOriginalValue(instance)
+        instance.HoldDuration = currentHoldDuration
+    end
+end
+
+game.DescendantAdded:Connect(onDescendantAdded)
+
+AutoTab:CreateToggle({
+    Name = "Instant Interact",
+    CurrentValue = false,
+    Callback = function(Value)
+        instantInteractEnabled = Value
+        if Value then
+            startInstantInteract()
+            print("Instant Interact ON - Hold Duration: " .. currentHoldDuration .. "s")
+        else
+            stopInstantInteract()
+            print("Instant Interact OFF")
+        end
+    end
+})
+
+AutoTab:CreateSlider({
+    Name = "Hold Duration",
+    Min = 0,
+    Max = 2,
+    Default = 0.1,
+    Precision = 2,
+    Callback = function(Value)
+        currentHoldDuration = Value
+        if instantInteractEnabled then
+            for prompt, _ in pairs(originalHoldDuration) do
+                if prompt and prompt.Parent then
+                    prompt.HoldDuration = currentHoldDuration
+                end
+            end
+        end
+        print("Hold Duration: " .. currentHoldDuration .. "s")
+    end
+})
+
+local Players = game:GetService("Players")
+local TycoonsFolder = workspace:WaitForChild("Map"):WaitForChild("Tycoons")
+
+local billboardEnabled = false
+local activeBillboards = {}
+local billboardLoop = nil
+
+local function createBillboardForTimer(timerTextLabel, screenPart)
+    if not screenPart or not screenPart:IsA("BasePart") then
+        return nil
+    end
+    
+    local old = screenPart:FindFirstChild("TimerBillboard")
+    if old then
+        old:Destroy()
+    end
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "TimerBillboard"
+    billboard.Adornee = screenPart
+    billboard.Parent = screenPart
+    billboard.Size = UDim2.fromOffset(250, 60)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 1000
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.fromScale(1, 1)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextSize = 30
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.Parent = billboard
+    
+    activeBillboards[screenPart] = {
+        Billboard = billboard,
+        TextLabel = textLabel,
+        TimerLabel = timerTextLabel
+    }
+    
+    return billboard
+end
+
+local function updateBillboardText()
+    for screenPart, data in pairs(activeBillboards) do
+        if data.TimerLabel and data.TimerLabel.Parent and data.TextLabel then
+            data.TextLabel.Text = " " .. tostring(data.TimerLabel.Text)
+        end
+    end
+end
+
+local function startBillboardLoop()
+    if billboardLoop then return end
+    
+    billboardLoop = task.spawn(function()
+        while billboardEnabled do
+            updateBillboardText()
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function stopBillboardLoop()
+    if billboardLoop then
+        task.cancel(billboardLoop)
+        billboardLoop = nil
+    end
+end
+
+local function removeAllBillboards()
+    for screenPart, data in pairs(activeBillboards) do
+        if data.Billboard and data.Billboard.Parent then
+            data.Billboard:Destroy()
+        end
+    end
+    activeBillboards = {}
+end
+
+local function createAllBillboards()
+    removeAllBillboards()
+    
+    for i = 1, 8 do
+        local tycoon = TycoonsFolder:FindFirstChild("Tycoon" .. i)
+        if tycoon then
+            local timeLabel = tycoon:FindFirstChild("Tycoon")
+                and tycoon.Tycoon:FindFirstChild("ForcefieldFolder")
+                and tycoon.Tycoon.ForcefieldFolder:FindFirstChild("Screen")
+                and tycoon.Tycoon.ForcefieldFolder.Screen:FindFirstChild("Screen")
+                and tycoon.Tycoon.ForcefieldFolder.Screen.Screen:FindFirstChild("SurfaceGui")
+                and tycoon.Tycoon.ForcefieldFolder.Screen.Screen.SurfaceGui:FindFirstChild("Time")
+            
+            if timeLabel and timeLabel:IsA("TextLabel") then
+                local screenPart = timeLabel.Parent and timeLabel.Parent.Parent
+                if screenPart and screenPart:IsA("BasePart") then
+                    createBillboardForTimer(timeLabel, screenPart)
+                end
+            end
+        end
+    end
+end
+
+local function enableBillboards()
+    if billboardEnabled then return end
+    createAllBillboards()
+    billboardEnabled = true
+    startBillboardLoop()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "ALL BASE TIMER",
+        Text = "Activated!",
+        Duration = 2
+    })
+end
+
+local function disableBillboards()
+    if not billboardEnabled then return end
+    billboardEnabled = false
+    stopBillboardLoop()
+    removeAllBillboards()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "ALL BASE TIMER",
+        Text = "Deactivated!",
+        Duration = 2
+    })
+end
+
+MainTab:CreateToggle({
+    Name = "ALL BASE TIMER",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value then
+            enableBillboards()
+        else
+            disableBillboards()
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local connection = nil
+local alreadyLocked = false
+
+local function GetOwnerTycoon()
+	for i = 1, 8 do
+		local tycoonPath = workspace.Map.Tycoons:FindFirstChild("Tycoon" .. i)
+
+		if tycoonPath and tycoonPath:FindFirstChild("Tycoon") then
+			local board = tycoonPath.Tycoon:FindFirstChild("Board")
+
+			if board and board:FindFirstChild("Board") then
+				local surfaceGui = board.Board:FindFirstChild("SurfaceGui")
+
+				if surfaceGui and surfaceGui:FindFirstChild("Username") then
+					local usernameLabel = surfaceGui.Username
+
+					if usernameLabel:IsA("TextLabel")
+						and usernameLabel.Text == LocalPlayer.Name then
+						return tycoonPath, i
+					end
+				end
+			end
+		end
+	end
+
+	return nil, nil
+end
+
+local function GetTimerText(tycoonPath)
+	if not tycoonPath then
+		return nil
+	end
+
+	local timeLabel =
+		tycoonPath:FindFirstChild("Tycoon")
+		and tycoonPath.Tycoon:FindFirstChild("ForcefieldFolder")
+		and tycoonPath.Tycoon.ForcefieldFolder:FindFirstChild("Screen")
+		and tycoonPath.Tycoon.ForcefieldFolder.Screen:FindFirstChild("Screen")
+		and tycoonPath.Tycoon.ForcefieldFolder.Screen.Screen:FindFirstChild("SurfaceGui")
+		and tycoonPath.Tycoon.ForcefieldFolder.Screen.Screen.SurfaceGui:FindFirstChild("Time")
+
+	if timeLabel and timeLabel:IsA("TextLabel") then
+		return timeLabel.Text
+	end
+
+	return nil
+end
+
+local function TeleportToButton(tycoonPath)
+	local char = LocalPlayer.Character
+	if not char then
+		return
+	end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+
+	local forceFieldBuy =
+		tycoonPath.Tycoon.ForcefieldFolder.Buttons:FindFirstChild("ForceFieldBuy")
+
+	if not forceFieldBuy then
+		warn("ForceFieldBuy not found")
+		return
+	end
+
+	local part = forceFieldBuy:FindFirstChild("Forcefield")
+
+	if not part or not part:IsA("BasePart") then
+		warn("Forcefield part not found")
+		return
+	end
+
+	hrp.CFrame = part.CFrame * CFrame.new(0, 5, 0)
+end
+
+local function CheckAndLock()
+	local myTycoon, tycoonNum = GetOwnerTycoon()
+
+	if not myTycoon then
+		return
+	end
+
+	local timerText = GetTimerText(myTycoon)
+
+	if not timerText then
+		return
+	end
+
+	print("Timer:", timerText)
+
+	if timerText == "0s" and not alreadyLocked then
+		alreadyLocked = true
+
+		TeleportToButton(myTycoon)
+
+		print("LOCKED! Tycoon " .. tycoonNum)
+	end
+
+	if timerText ~= "0s" then
+		alreadyLocked = false
+	end
+end
+
+MainTab:CreateToggle({
+	Name = "Auto Lock Base",
+	CurrentValue = false,
+	Callback = function(state)
+		if state then
+			if connection then
+				connection:Disconnect()
+			end
+
+			alreadyLocked = false
+
+			connection = RunService.Heartbeat:Connect(CheckAndLock)
+
+			print("Auto Lock ON")
+		else
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+
+			print("Auto Lock OFF")
+		end
+	end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local espActive = false
+local espObjects = {}
+local connection = nil
+
+local function GetDistance(plr)
+	local myChar = LocalPlayer.Character
+	if not myChar then return 0 end
+
+	local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+	if not myHRP then return 0 end
+
+	local targetChar = plr.Character
+	if not targetChar then return 0 end
+
+	local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+	if not targetHRP then return 0 end
+
+	return math.floor((myHRP.Position - targetHRP.Position).Magnitude)
+end
+
+local function CreateESP(plr)
+	if plr == LocalPlayer then return end
+	if espObjects[plr] then return end
+
+	local char = plr.Character
+	if not char then return end
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local highlight = Instance.new("Highlight")
+	highlight.FillTransparency = 0.6
+	highlight.OutlineTransparency = 0
+	highlight.FillColor = Color3.fromRGB(255, 255, 0)
+	highlight.Parent = char
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "PlayerESP"
+	billboard.Size = UDim2.new(0, 250, 0, 80)
+	billboard.StudsOffset = Vector3.new(0, 3, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Adornee = char:FindFirstChild("Head") or hrp
+	billboard.Parent = char
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(1, 0, 0, 30)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextStrokeTransparency = 0
+	nameLabel.TextScaled = true
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.Text = plr.Name
+	nameLabel.Parent = billboard
+
+	local distanceLabel = Instance.new("TextLabel")
+	distanceLabel.Size = UDim2.new(1, 0, 0, 25)
+	distanceLabel.Position = UDim2.new(0, 0, 0, 30)
+	distanceLabel.BackgroundTransparency = 1
+	distanceLabel.TextStrokeTransparency = 0
+	distanceLabel.TextScaled = true
+	distanceLabel.Font = Enum.Font.GothamBold
+	distanceLabel.Parent = billboard
+
+	local statusLabel = Instance.new("TextLabel")
+	statusLabel.Size = UDim2.new(1, 0, 0, 25)
+	statusLabel.Position = UDim2.new(0, 0, 0, 55)
+	statusLabel.BackgroundTransparency = 1
+	statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+	statusLabel.TextStrokeTransparency = 0
+	statusLabel.TextScaled = true
+	statusLabel.Font = Enum.Font.GothamBold
+	statusLabel.Text = "[PLAYER]"
+	statusLabel.Parent = billboard
+
+	espObjects[plr] = {
+		highlight,     -- [1]
+		billboard,     -- [2]
+		nameLabel,     -- [3]
+		distanceLabel, -- [4]
+		statusLabel    -- [5]
+	}
+end
+
+local function RemoveESP(plr)
+	local data = espObjects[plr]
+
+	if data then
+		for _, obj in ipairs(data) do
+			if obj and obj.Parent then
+				obj:Destroy()
+			end
+		end
+
+		espObjects[plr] = nil
+	end
+end
+
+local function UpdateESP()
+	if not espActive then
+		return
+	end
+
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			local char = plr.Character
+
+			if char and char.Parent and char:FindFirstChild("HumanoidRootPart") then
+				if not espObjects[plr] then
+					CreateESP(plr)
+				end
+
+				local data = espObjects[plr]
+
+				if data then
+					local distanceLabel = data[4]
+					local highlight = data[1]
+
+					local dist = GetDistance(plr)
+
+					distanceLabel.Text = "DISTANCE : [" .. dist .. "M]"
+
+					if dist < 10 then
+						distanceLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+						highlight.FillColor = Color3.fromRGB(255, 0, 0)
+					elseif dist < 30 then
+						distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+						highlight.FillColor = Color3.fromRGB(255, 255, 0)
+					else
+						distanceLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+						highlight.FillColor = Color3.fromRGB(0, 255, 0)
+					end
+				end
+			else
+				RemoveESP(plr)
+			end
+		end
+	end
+
+	for plr in pairs(espObjects) do
+		if not plr.Parent or not plr.Character then
+			RemoveESP(plr)
+		end
+	end
+end
+
+ESPTab:CreateToggle({
+	Name = "ESP Player",
+	CurrentValue = false,
+	Callback = function(state)
+		espActive = state
+
+		if state then
+			if connection then
+				connection:Disconnect()
+			end
+
+			connection = RunService.RenderStepped:Connect(UpdateESP)
+			UpdateESP()
+		else
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+
+			for plr in pairs(espObjects) do
+				RemoveESP(plr)
+			end
+		end
+	end,
+})
+
+local RunService = game:GetService("RunService")
+
+local timerActive = false
+local connection = nil
+
+local lastNotify = {
+	Cosmic = false,
+	Mythic = false,
+	Deep = false
+}
+
+local function GetTimerValue(text)
+	if not text or text == "" then
+		return nil
+	end
+
+	local minutes, seconds = text:match("(%d+):(%d+)")
+
+	if minutes and seconds then
+		return (tonumber(minutes) * 60) + tonumber(seconds)
+	end
+
+	return nil
+end
+
+local function GetTimerText(obj)
+	if not obj then
+		return nil
+	end
+
+	if obj:IsA("TextLabel") or obj:IsA("TextBox") then
+		return obj.Text
+	end
+
+	local textLabel = obj:FindFirstChildWhichIsA("TextLabel")
+
+	if textLabel then
+		return textLabel.Text
+	end
+
+	return nil
+end
+
+local function Notify(title, text)
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = title,
+			Text = text,
+			Duration = 5
+		})
+	end)
+end
+
+local function CheckTimers()
+	local trashEntry = workspace.Map:FindFirstChild("TrashEntry")
+	if not trashEntry then return end
+
+	local timerFolder = trashEntry:FindFirstChild("Timer")
+	if not timerFolder then return end
+
+	local cosmicObj =
+		timerFolder:FindFirstChild("BoardPart")
+		and timerFolder.BoardPart:FindFirstChild("SurfaceGui")
+		and timerFolder.BoardPart.SurfaceGui:FindFirstChild("Cosmic")
+
+	local mythicObj =
+		timerFolder:FindFirstChild("BoardPart")
+		and timerFolder.BoardPart:FindFirstChild("SurfaceGui")
+		and timerFolder.BoardPart.SurfaceGui:FindFirstChild("Mythic")
+
+	local deepObj =
+		timerFolder:FindFirstChild("BoardPart2")
+		and timerFolder.BoardPart2:FindFirstChild("SurfaceGui")
+		and timerFolder.BoardPart2.SurfaceGui:FindFirstChild("Deep")
+
+	local timers = {
+		Cosmic = cosmicObj,
+		Mythic = mythicObj,
+		Deep = deepObj
+	}
+
+	for name, obj in pairs(timers) do
+		local text = GetTimerText(obj)
+
+		if text then
+			local seconds = GetTimerValue(text)
+
+			if seconds and seconds <= 0 then
+				if not lastNotify[name] then
+					Notify("🐟 " .. string.upper(name), "Spawner Ready!")
+					lastNotify[name] = true
+				end
+			elseif seconds and seconds > 0 then
+				lastNotify[name] = false
+			end
+		end
+	end
+end
+
+MainTab:CreateToggle({
+	Name = "Notify Spawn Fish(Mythic/Cosmic/Deep)",
+	CurrentValue = false,
+	Callback = function(state)
+		timerActive = state
+
+		if state then
+			lastNotify = {
+				Cosmic = false,
+				Mythic = false,
+				Deep = false
+			}
+
+			if connection then
+				connection:Disconnect()
+			end
+
+			connection = RunService.Heartbeat:Connect(CheckTimers)
+		else
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+		end
+	end
+})
+
+TeleportTab:CreateButton({
+    Name = "Teleport to Tool Store",
+    Callback = function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local cframe = CFrame.new(
+            36.7040825, 10.1205969, 152.461899,
+            -0.812278807, 2.80155845e-08, -0.583269358,
+            -4.27750884e-08, 1, 1.07601885e-07,
+            0.583269358, 1.12352126e-07, -0.812278807
+        )
+        
+        hrp.CFrame = cframe
+    end,
+})
+
+TeleportTab:CreateButton({
+    Name = "Teleport to Spawner Fish",
+    Callback = function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        hrp.CFrame = CFrame.new(217.470016, 9.29815102, 138.906021)
+        print("Teleport to Spawner Fish!")
+    end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local connection = nil
+local myTycoonNumber = nil
+
+local function GetMyTycoonNumber()
+	for i = 1, 8 do
+		local tycoonPath = workspace.Map.Tycoons:FindFirstChild("Tycoon" .. i)
+
+		if tycoonPath and tycoonPath:FindFirstChild("Tycoon") then
+			local board = tycoonPath.Tycoon:FindFirstChild("Board")
+
+			if board and board:FindFirstChild("Board") then
+				local surfaceGui = board.Board:FindFirstChild("SurfaceGui")
+
+				if surfaceGui and surfaceGui:FindFirstChild("Username") then
+					local usernameLabel = surfaceGui.Username
+
+					if usernameLabel:IsA("TextLabel")
+						and usernameLabel.Text == LocalPlayer.Name then
+						return i
+					end
+				end
+			end
+		end
+	end
+
+	return nil
+end
+
+local function TeleportToMyBase()
+	if not myTycoonNumber then
+		myTycoonNumber = GetMyTycoonNumber()
+	end
+
+	if not myTycoonNumber then
+		return
+	end
+
+	local tycoonPath = workspace.Map.Tycoons:FindFirstChild("Tycoon" .. myTycoonNumber)
+	if not tycoonPath then
+		return
+	end
+
+	local myTycoon = tycoonPath:FindFirstChild("Tycoon")
+	if not myTycoon then
+		return
+	end
+
+	local collectZone = myTycoon:FindFirstChild("CollectZone")
+	if not collectZone then
+		return
+	end
+
+	local collectPart = collectZone:FindFirstChild("CollectPart")
+	if not collectPart or not collectPart:IsA("BasePart") then
+		return
+	end
+
+	local character = LocalPlayer.Character
+	if not character then
+		return
+	end
+
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+
+	hrp.CFrame = collectPart.CFrame * CFrame.new(0, 10, 0)
+end
+
+TeleportTab:CreateToggle({
+	Name = "Back To Base",
+	CurrentValue = false,
+	Callback = function(state)
+		if state then
+			myTycoonNumber = GetMyTycoonNumber()
+
+			if not myTycoonNumber then
+				warn("Base tidak ditemukan")
+				return
+			end
+
+			if connection then
+				connection:Disconnect()
+			end
+
+			connection = RunService.Heartbeat:Connect(function()
+				TeleportToMyBase()
+			end)
+		else
+			if connection then
+				connection:Disconnect()
+				connection = nil
+			end
+		end
+	end
+})
