@@ -31,46 +31,18 @@ local StealSection = StealTab:CreateSection("Stealing")
 local TeleSection = TeleportTab:CreateSection("Teleport")
 local MiscSection = MiscTab:CreateSection("Misc")
 
-local player = game.Players.LocalPlayer
 local walkspeedEnabled = false
-local currentSpeed = 16
-local antiResetLoop = nil
+local currentSpeed = 50
 
 local function setWalkspeed(speed)
-    local char = player.Character
-    if char then
-        local humanoid = char:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = speed
-        end
-    end
-end
-
-local function startAntiReset()
-    if antiResetLoop then task.cancel(antiResetLoop) end
-    antiResetLoop = task.spawn(function()
-        while walkspeedEnabled do
-            task.wait(0.1)
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChild("Humanoid")
-                if humanoid and humanoid.WalkSpeed ~= currentSpeed then
-                    humanoid.WalkSpeed = currentSpeed
-                end
-            end
-        end
-    end)
-end
-
-local function stopAntiReset()
-    if antiResetLoop then
-        task.cancel(antiResetLoop)
-        antiResetLoop = nil
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = speed
     end
 end
 
 MainTab:CreateToggle({
-    Name = "Toggle Walkspeed",
+    Name = "Toggle Speed",
     CurrentValue = false,
     Callback = function(Value)
         walkspeedEnabled = Value
@@ -78,23 +50,6 @@ MainTab:CreateToggle({
             setWalkspeed(currentSpeed)
         else
             setWalkspeed(16)
-            stopAntiReset()
-        end
-    end
-})
-
-MainTab:CreateToggle({
-    Name = "Toggle Walkspeed (Anti Reset)",
-    CurrentValue = false,
-    Callback = function(Value)
-        if Value then
-            walkspeedEnabled = true
-            setWalkspeed(currentSpeed)
-            startAntiReset()
-        else
-            walkspeedEnabled = false
-            setWalkspeed(16)
-            stopAntiReset()
         end
     end
 })
@@ -129,7 +84,7 @@ local function startNoclip()
                     end
                 end
             end
-            task.wait(0.1)
+            task.wait(0.5)
         end
     end)
 end
@@ -345,7 +300,7 @@ local function createBillboardForTimer(timerTextLabel, screenPart)
     billboard.Size = UDim2.fromOffset(250, 60)
     billboard.StudsOffset = Vector3.new(0, 3, 0)
     billboard.AlwaysOnTop = true
-    billboard.MaxDistance = 1000
+    billboard.MaxDistance = 500
     
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.fromScale(1, 1)
@@ -368,7 +323,7 @@ end
 local function updateBillboardText()
     for screenPart, data in pairs(activeBillboards) do
         if data.TimerLabel and data.TimerLabel.Parent and data.TextLabel then
-            data.TextLabel.Text = " " .. tostring(data.TimerLabel.Text)
+            data.TextLabel.Text = "⏱️ " .. tostring(data.TimerLabel.Text)
         end
     end
 end
@@ -379,7 +334,7 @@ local function startBillboardLoop()
     billboardLoop = task.spawn(function()
         while billboardEnabled do
             updateBillboardText()
-            task.wait(0.1)
+            task.wait(0.5)  -- Dari 0.1 jadi 0.5 (lebih lambat = lebih ringan)
         end
     end)
 end
@@ -430,7 +385,7 @@ local function enableBillboards()
     startBillboardLoop()
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "ALL BASE TIMER",
-        Text = "Activated!",
+        Text = "Activated! (Update setiap 0.5 detik)",
         Duration = 2
     })
 end
@@ -600,172 +555,152 @@ local RunService = game:GetService("RunService")
 local espActive = false
 local espObjects = {}
 local connection = nil
+local updateCounter = 0
 
 local function GetDistance(plr)
-	local myChar = LocalPlayer.Character
-	if not myChar then return 0 end
-
-	local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-	if not myHRP then return 0 end
-
-	local targetChar = plr.Character
-	if not targetChar then return 0 end
-
-	local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-	if not targetHRP then return 0 end
-
-	return math.floor((myHRP.Position - targetHRP.Position).Magnitude)
+    local myChar = LocalPlayer.Character
+    if not myChar then return 0 end
+    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return 0 end
+    local targetChar = plr.Character
+    if not targetChar then return 0 end
+    local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+    if not targetHRP then return 0 end
+    return math.floor((myHRP.Position - targetHRP.Position).Magnitude)
 end
 
 local function CreateESP(plr)
-	if plr == LocalPlayer then return end
-	if espObjects[plr] then return end
+    if plr == LocalPlayer then return end
+    if espObjects[plr] then return end
 
-	local char = plr.Character
-	if not char then return end
+    local char = plr.Character
+    if not char then return end
 
-	local hrp = char:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
-	local highlight = Instance.new("Highlight")
-	highlight.FillTransparency = 0.6
-	highlight.OutlineTransparency = 0
-	highlight.FillColor = Color3.fromRGB(255, 255, 0)
-	highlight.Parent = char
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.7
+    highlight.OutlineTransparency = 0.3
+    highlight.FillColor = Color3.fromRGB(255, 255, 0)
+    highlight.Parent = char
 
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "PlayerESP"
-	billboard.Size = UDim2.new(0, 250, 0, 80)
-	billboard.StudsOffset = Vector3.new(0, 3, 0)
-	billboard.AlwaysOnTop = true
-	billboard.Adornee = char:FindFirstChild("Head") or hrp
-	billboard.Parent = char
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "PlayerESP"
+    billboard.Size = UDim2.new(0, 180, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Adornee = char:FindFirstChild("Head") or hrp
+    billboard.Parent = char
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Size = UDim2.new(1, 0, 0, 30)
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.TextColor3 = Color3.new(1, 1, 1)
-	nameLabel.TextStrokeTransparency = 0
-	nameLabel.TextScaled = true
-	nameLabel.Font = Enum.Font.GothamBold
-	nameLabel.Text = plr.Name
-	nameLabel.Parent = billboard
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 0, 25)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.TextColor3 = Color3.new(1, 1, 1)
+    nameLabel.TextStrokeTransparency = 0.5
+    nameLabel.TextScaled = true
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.Text = plr.Name
+    nameLabel.Parent = billboard
 
-	local distanceLabel = Instance.new("TextLabel")
-	distanceLabel.Size = UDim2.new(1, 0, 0, 25)
-	distanceLabel.Position = UDim2.new(0, 0, 0, 30)
-	distanceLabel.BackgroundTransparency = 1
-	distanceLabel.TextStrokeTransparency = 0
-	distanceLabel.TextScaled = true
-	distanceLabel.Font = Enum.Font.GothamBold
-	distanceLabel.Parent = billboard
+    local distanceLabel = Instance.new("TextLabel")
+    distanceLabel.Size = UDim2.new(1, 0, 0, 20)
+    distanceLabel.Position = UDim2.new(0, 0, 0, 25)
+    distanceLabel.BackgroundTransparency = 1
+    distanceLabel.TextStrokeTransparency = 0.5
+    distanceLabel.TextScaled = true
+    distanceLabel.Font = Enum.Font.GothamBold
+    distanceLabel.Parent = billboard
 
-	local statusLabel = Instance.new("TextLabel")
-	statusLabel.Size = UDim2.new(1, 0, 0, 25)
-	statusLabel.Position = UDim2.new(0, 0, 0, 55)
-	statusLabel.BackgroundTransparency = 1
-	statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-	statusLabel.TextStrokeTransparency = 0
-	statusLabel.TextScaled = true
-	statusLabel.Font = Enum.Font.GothamBold
-	statusLabel.Text = "[PLAYER]"
-	statusLabel.Parent = billboard
-
-	espObjects[plr] = {
-		highlight,     -- [1]
-		billboard,     -- [2]
-		nameLabel,     -- [3]
-		distanceLabel, -- [4]
-		statusLabel    -- [5]
-	}
+    espObjects[plr] = {
+        highlight,
+        billboard,
+        nameLabel,
+        distanceLabel
+    }
 end
 
 local function RemoveESP(plr)
-	local data = espObjects[plr]
-
-	if data then
-		for _, obj in ipairs(data) do
-			if obj and obj.Parent then
-				obj:Destroy()
-			end
-		end
-
-		espObjects[plr] = nil
-	end
+    local data = espObjects[plr]
+    if data then
+        for _, obj in ipairs(data) do
+            if obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        espObjects[plr] = nil
+    end
 end
 
 local function UpdateESP()
-	if not espActive then
-		return
-	end
-
-	for _, plr in ipairs(Players:GetPlayers()) do
-		if plr ~= LocalPlayer then
-			local char = plr.Character
-
-			if char and char.Parent and char:FindFirstChild("HumanoidRootPart") then
-				if not espObjects[plr] then
-					CreateESP(plr)
-				end
-
-				local data = espObjects[plr]
-
-				if data then
-					local distanceLabel = data[4]
-					local highlight = data[1]
-
-					local dist = GetDistance(plr)
-
-					distanceLabel.Text = "DISTANCE : [" .. dist .. "M]"
-
-					if dist < 10 then
-						distanceLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-						highlight.FillColor = Color3.fromRGB(255, 0, 0)
-					elseif dist < 30 then
-						distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-						highlight.FillColor = Color3.fromRGB(255, 255, 0)
-					else
-						distanceLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-						highlight.FillColor = Color3.fromRGB(0, 255, 0)
-					end
-				end
-			else
-				RemoveESP(plr)
-			end
-		end
-	end
-
-	for plr in pairs(espObjects) do
-		if not plr.Parent or not plr.Character then
-			RemoveESP(plr)
-		end
-	end
+    if not espActive then return end
+    
+    updateCounter = updateCounter + 1
+    local shouldUpdateDistance = updateCounter % 3 == 0
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            local char = plr.Character
+            if char and char.Parent and char:FindFirstChild("HumanoidRootPart") then
+                if not espObjects[plr] then
+                    CreateESP(plr)
+                end
+                
+                if shouldUpdateDistance then
+                    local data = espObjects[plr]
+                    if data then
+                        local distanceLabel = data[4]
+                        local highlight = data[1]
+                        local dist = GetDistance(plr)
+                        distanceLabel.Text = "[" .. dist .. "m]"
+                        
+                        if dist < 10 then
+                            distanceLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                        elseif dist < 30 then
+                            distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                            highlight.FillColor = Color3.fromRGB(255, 255, 0)
+                        else
+                            distanceLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                            highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                        end
+                    end
+                end
+            else
+                RemoveESP(plr)
+            end
+        end
+    end
+    
+    for plr in pairs(espObjects) do
+        if not plr.Parent or not plr.Character then
+            RemoveESP(plr)
+        end
+    end
 end
 
 ESPTab:CreateToggle({
-	Name = "ESP Player",
-	CurrentValue = false,
-	Callback = function(state)
-		espActive = state
-
-		if state then
-			if connection then
-				connection:Disconnect()
-			end
-
-			connection = RunService.RenderStepped:Connect(UpdateESP)
-			UpdateESP()
-		else
-			if connection then
-				connection:Disconnect()
-				connection = nil
-			end
-
-			for plr in pairs(espObjects) do
-				RemoveESP(plr)
-			end
-		end
-	end,
+    Name = "ESP Player",
+    CurrentValue = false,
+    Callback = function(state)
+        espActive = state
+        if state then
+            if connection then
+                connection:Disconnect()
+            end
+            updateCounter = 0
+            connection = RunService.RenderStepped:Connect(UpdateESP)
+            UpdateESP()
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+            for plr in pairs(espObjects) do
+                RemoveESP(plr)
+            end
+        end
+    end
 })
 
 local RunService = game:GetService("RunService")
