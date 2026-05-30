@@ -28,7 +28,7 @@ local MainSection = MainTab:CreateSection("Main")
 local AutoSection = AutoTab:CreateSection("Auto")
 local ESPSection = ESPTab:CreateSection("ESP")
 local StealSection = StealTab:CreateSection("Stealing")
-+local TeleSection = TeleportTab:CreateSection("Teleport")
+local TeleSection = TeleportTab:CreateSection("Teleport")
 local MiscSection = MiscTab:CreateSection("Misc")
 
 local player = game.Players.LocalPlayer
