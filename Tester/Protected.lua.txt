@@ -291,24 +291,24 @@ game.DescendantAdded:Connect(onDescendantAdded)
 AutoTab:CreateToggle({
     Name = "Instant Interact",
     CurrentValue = false,
+    Flag = "InstantInteract",
     Callback = function(Value)
         instantInteractEnabled = Value
         if Value then
             startInstantInteract()
-            print("Instant Interact ON - Hold Duration: " .. currentHoldDuration .. "s")
         else
             stopInstantInteract()
-            print("Instant Interact OFF")
         end
     end
 })
 
 AutoTab:CreateSlider({
     Name = "Hold Duration",
-    Min = 0,
-    Max = 2,
-    Default = 0.1,
-    Precision = 2,
+    Range = {0, 2},
+    Increment = 0.05,
+    Suffix = "s",
+    CurrentValue = 0.1,
+    Flag = "HoldDuration",
     Callback = function(Value)
         currentHoldDuration = Value
         if instantInteractEnabled then
@@ -318,7 +318,6 @@ AutoTab:CreateSlider({
                 end
             end
         end
-        print("Hold Duration: " .. currentHoldDuration .. "s")
     end
 })
 
