@@ -270,7 +270,7 @@ local FeSectionLeft = FETab:NewSection({
 FeSectionLeft:NewButton({
 	Title = "FE SCP 096SL",
 	Callback = function()
-		local Players = game:GetService("Players")
+	  local Players = game:GetService("Players")
 		local Player = Players.LocalPlayer
 		local RunService = game:GetService("RunService")
 
@@ -511,7 +511,7 @@ FeSectionLeft:NewButton({
 FeSectionLeft:NewButton({
 	Title = "FE SCP 096",
 	Callback = function()
-		local Players = game:GetService("Players")
+	   local Players = game:GetService("Players")
 		local Player = Players.LocalPlayer
 		local RunService = game:GetService("RunService")
 
@@ -595,6 +595,7 @@ FeSectionLeft:NewButton({
 		end
 
 		local soundPlayer = nil
+		local soundConnection = nil
 		local runTrack = nil
 		local standingTrack = nil
 		local currentTrack = nil
@@ -605,12 +606,17 @@ FeSectionLeft:NewButton({
 				soundPlayer:Stop()
 				soundPlayer:Destroy()
 			end
+			if soundConnection then
+				soundConnection:Disconnect()
+				soundConnection = nil
+			end
 			soundPlayer = Instance.new("Sound")
 			soundPlayer.SoundId = soundId
 			soundPlayer.Volume = volume or 5
 			soundPlayer.Looped = looped or false
 			soundPlayer.Parent = hrp
 			soundPlayer:Play()
+			return soundPlayer
 		end
 
 		local function StopSound()
@@ -618,6 +624,10 @@ FeSectionLeft:NewButton({
 				soundPlayer:Stop()
 				soundPlayer:Destroy()
 				soundPlayer = nil
+			end
+			if soundConnection then
+				soundConnection:Disconnect()
+				soundConnection = nil
 			end
 		end
 
@@ -628,7 +638,7 @@ FeSectionLeft:NewButton({
 			if standingTrack and standingTrack.IsPlaying then
 				standingTrack:Stop()
 			end
-			if currentTrack then
+			if currentTrack and currentTrack.IsPlaying then
 				currentTrack:Stop()
 			end
 		end
@@ -653,12 +663,13 @@ FeSectionLeft:NewButton({
 			standingTrack:Play()
 		end
 
-		local function PlayAnim(id, callback)
+		local function PlayAnim(id, looped, callback)
+			StopAllAnims()
 			local anim = Instance.new("Animation")
 			anim.AnimationId = id
 			currentTrack = animator:LoadAnimation(anim)
 			currentTrack.Priority = Enum.AnimationPriority.Action
-			currentTrack.Looped = false
+			currentTrack.Looped = looped or false
 			currentTrack:Play()
 			if callback then
 				currentTrack.Stopped:Connect(callback)
@@ -672,44 +683,44 @@ FeSectionLeft:NewButton({
 		ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 
 		local MainFrame = Instance.new("Frame")
-		MainFrame.Size = UDim2.new(0,180,0,300)
-		MainFrame.Position = UDim2.new(1,-190,0.5,-150)
-		MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+		MainFrame.Size = UDim2.new(0,250,0,550)
+		MainFrame.Position = UDim2.new(1,-260,0.5,-275)
+		MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
 		MainFrame.BorderSizePixel = 0
 		MainFrame.Parent = ScreenGui
 
-		Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,8)
+		Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
 
 		local Title = Instance.new("TextLabel")
-		Title.Size = UDim2.new(1,0,0,35)
+		Title.Size = UDim2.new(1,0,0,40)
 		Title.Position = UDim2.new(0,0,0,0)
 		Title.Text = "FE SCP 096"
 		Title.TextScaled = false
-		Title.TextSize = 14
-		Title.BackgroundColor3 = Color3.fromRGB(35,35,35)
-		Title.TextColor3 = Color3.fromRGB(255,100,100)
+		Title.TextSize = 12
+		Title.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		Title.TextColor3 = Color3.fromRGB(255,0,0)
 		Title.Font = Enum.Font.GothamBold
 		Title.Parent = MainFrame
 
 		local ScrollingFrame = Instance.new("ScrollingFrame")
-		ScrollingFrame.Size = UDim2.new(1,0,1,-40)
-		ScrollingFrame.Position = UDim2.new(0,0,0,38)
+		ScrollingFrame.Size = UDim2.new(1,0,1,-50)
+		ScrollingFrame.Position = UDim2.new(0,0,0,45)
 		ScrollingFrame.BackgroundTransparency = 1
-		ScrollingFrame.ScrollBarThickness = 6
+		ScrollingFrame.ScrollBarThickness = 8
 		ScrollingFrame.CanvasSize = UDim2.new(0,0,0,0)
 		ScrollingFrame.Parent = MainFrame
 
 		local UIListLayout = Instance.new("UIListLayout")
-		UIListLayout.Padding = UDim.new(0,8)
+		UIListLayout.Padding = UDim.new(0,10)
 		UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 		UIListLayout.Parent = ScrollingFrame
 
 		local Toggle = Instance.new("TextButton")
-		Toggle.Size = UDim2.new(0,30,0,30)
-		Toggle.Position = UDim2.new(1,-35,0,-35)
+		Toggle.Size = UDim2.new(0,40,0,40)
+		Toggle.Position = UDim2.new(1,-45,0,-45)
 		Toggle.Text = "X"
 		Toggle.TextScaled = true
-		Toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		Toggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
 		Toggle.TextColor3 = Color3.new(1,1,1)
 		Toggle.Parent = ScreenGui
 
@@ -717,84 +728,64 @@ FeSectionLeft:NewButton({
 
 		local function CreateButton(name, callback)
 			local button = Instance.new("TextButton")
-			button.Size = UDim2.new(0,150,0,40)
+			button.Size = UDim2.new(0,200,0,50)
 			button.Text = name
 			button.TextScaled = false
-			button.TextSize = 14
+			button.TextSize = 12
 			button.BackgroundColor3 = Color3.fromRGB(60,60,60)
 			button.TextColor3 = Color3.new(1,1,1)
 			button.Parent = ScrollingFrame
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0,8)
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0,10)
 			button.MouseButton1Click:Connect(callback)
 			return button
 		end
 
+		CreateButton("Standing", function()
+			if busy then return end
+			StopAllAnims()
+			StopSound()
+			PlayStandingAnim()
+			PlaySound("rbxassetid://9161589557", true 5)
+		end)
+
 		CreateButton("Run", function()
 			if busy then return end
 			PlayRunAnim()
-			PlaySound("rbxassetid://15283441112", true, 5)
-		end)
-
-		CreateButton("Standing", function()
-			if busy then return end
-			PlayStandingAnim()
-			PlaySound("rbxassetid://9161589557", true, 5)
+			PlaySound("rbxassetid://15283462663", true, 5)
 		end)
 
 		CreateButton("Panic", function()
-	if busy then
-		return
-	end
-
-	busy = true
-
-	StopAllAnims()
-
-	local sound = PlaySound("rbxassetid://15283462663", false, 1)
-
-	PlayAnim("rbxassetid://7333030605", function()
-
-		local loopAnim = PlayAnim("rbxassetid://7333091977")
-
-		if sound and sound.TimeLength > 0 then
-			task.wait(sound.TimeLength)
-		else
-			task.wait(3)
-		end
-
-		if loopAnim then
-			loopAnim:Stop()
-		end
-
-		busy = false
-	end)
-end)
-
-		CreateButton("Kill", function()
-	if busy then
-		return
-	end
-
-	busy = true
-
-	StopAllAnims()
-
-	PlaySound("rbxassetid://17878427121", false, 5)
-	PlaySound("rbxassetid://531421188", false, 5)
-
-	PlayAnim("rbxassetid://15172539171", function()
-	end)
-
-	task.wait(2)
-
-	busy = false
-end)
+			if busy then return end
+			busy = true
+			          
+			local panicSound = PlaySound("rbxassetid://15283443716", true, 5)
+			
+			PlayAnim("rbxassetid://8286121550", true)
+			
+			if soundConnection then
+				soundConnection:Disconnect()
+			end
+			soundConnection = panicSound.Ended:Connect(function()
+				if soundConnection then
+					soundConnection:Disconnect()
+					soundConnection = nil
+				end
+				
+				PlayRunAnim()
+				PlaySound("rbxassetid://15283443061", true, 5)
+				busy = false
+			end)
+		end)
 
 		CreateButton("Stop All", function()
 			StopAllAnims()
 			StopSound()
+			busy = false
 		end)
-
+		
+		CreateButton("Kill", function()
+		    warn("Not Working")
+		end)
 		UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 			ScrollingFrame.CanvasSize = UDim2.new(0,0,0,UIListLayout.AbsoluteContentSize.Y)
 		end)
